@@ -1,8 +1,7 @@
 import daiquiri
-import logging
 
 daiquiri.setup(outputs=(
-    daiquiri.output.Stream(formatter=logging.Formatter(
+    daiquiri.output.Stream(formatter=daiquiri.formatter.ColorFormatter(
         fmt=daiquiri.output.DEFAULT_FORMAT + " [%(subsystem)s is %(mood)s]")),
     ))
 
