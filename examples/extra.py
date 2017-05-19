@@ -1,9 +1,9 @@
 import daiquiri
 import logging
 
-daiquiri.setup(targets=(
-    daiquiri.target.Stream(formatter=logging.Formatter(
-        fmt=daiquiri.target.DEFAULT_FORMAT + " [%(subsystem)s is %(mood)s]")),
+daiquiri.setup(outputs=(
+    daiquiri.output.Stream(formatter=logging.Formatter(
+        fmt=daiquiri.output.DEFAULT_FORMAT + " [%(subsystem)s is %(mood)s]")),
     ))
 
 logger = daiquiri.getLogger(__name__, subsystem="example")

@@ -26,9 +26,9 @@ class TestDaiquiri(testtools.TestCase):
 
     def test_setup_json_formatter(self):
         stream = io.StringIO()
-        daiquiri.setup(targets=(
-            daiquiri.target.Stream(
-                stream, formatter=daiquiri.target.JSON_FORMATTER),
+        daiquiri.setup(outputs=(
+            daiquiri.output.Stream(
+                stream, formatter=daiquiri.output.JSON_FORMATTER),
         ))
         daiquiri.getLogger(__name__).info("foobar")
         self.assertEqual({"message": "foobar", "color": "", "color_stop": ""},

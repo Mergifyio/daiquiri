@@ -31,8 +31,8 @@ TEXT_FORMATTER = logging.Formatter(fmt=DEFAULT_FORMAT)
 JSON_FORMATTER = jsonlogger.JsonFormatter()
 
 
-class Target(object):
-    """Generic log target."""
+class Output(object):
+    """Generic log output."""
 
     def __init__(self, handler, formatter=TEXT_FORMATTER, level=logging.INFO):
         self.handler = handler
@@ -40,14 +40,14 @@ class Target(object):
         self.handler.setLevel(level)
 
     def add_to_logger(self, logger):
-        """Add this target to a logger."""
+        """Add this output to a logger."""
         logger.addHandler(self.handler)
 
 
-class File(Target):
+class File(Output):
     def __init__(self, filename=None, directory=None, suffix=".log",
                  binary=None, formatter=TEXT_FORMATTER, level=logging.INFO):
-        """Log file target.
+        """Log file output.
 
         :param filename: The log file path to write to.
         If directory is also specified, both will be combined.
@@ -78,7 +78,7 @@ class File(Target):
             return os.path.join(logdir, binary) + logfile_suffix
 
 
-class Stream(Target):
+class Stream(Output):
     def __init__(self, stream=sys.stderr, formatter=TEXT_FORMATTER,
                  level=logging.INFO):
         super(Stream, self).__init__(handlers.ColorStreamHandler(stream),
@@ -89,13 +89,13 @@ STDERR = Stream()
 STDOUT = Stream(sys.stdout)
 
 
-class Journal(Target):
+class Journal(Output):
     def __init__(self, formatter=TEXT_FORMATTER, level=logging.INFO):
         super(Journal, self).__init__(handlers.JournalHandler(),
                                       formatter, level)
 
 
-class Syslog(Target):
+class Syslog(Output):
     def __init__(self, facility="user", formatter=TEXT_FORMATTER,
                  level=logging.INFO):
         if syslog is None:

@@ -13,36 +13,36 @@ import syslog
 
 import testtools
 
-from daiquiri import target
+from daiquiri import output
 
 
-class TestTarget(testtools.TestCase):
+class TestOutput(testtools.TestCase):
     def test_find_facility(self):
         self.assertEqual(syslog.LOG_USER,
-                         target.Syslog._find_facility("user"))
+                         output.Syslog._find_facility("user"))
         self.assertEqual(syslog.LOG_LOCAL1,
-                         target.Syslog._find_facility("log_local1"))
+                         output.Syslog._find_facility("log_local1"))
         self.assertEqual(syslog.LOG_LOCAL2,
-                         target.Syslog._find_facility("LOG_local2"))
+                         output.Syslog._find_facility("LOG_local2"))
         self.assertEqual(syslog.LOG_LOCAL3,
-                         target.Syslog._find_facility("LOG_LOCAL3"))
+                         output.Syslog._find_facility("LOG_LOCAL3"))
         self.assertEqual(syslog.LOG_LOCAL4,
-                         target.Syslog._find_facility("LOCaL4"))
+                         output.Syslog._find_facility("LOCaL4"))
 
     def test_get_log_file_path(self):
         self.assertEqual("foobar.log",
-                         target.File._get_log_file_path("foobar.log"))
+                         output.File._get_log_file_path("foobar.log"))
         self.assertEqual("/var/log/foo/foobar.log",
-                         target.File._get_log_file_path("foobar.log",
+                         output.File._get_log_file_path("foobar.log",
                                                         logdir="/var/log/foo"))
         self.assertEqual("/var/log/foobar.log",
-                         target.File._get_log_file_path(logdir="/var/log",
+                         output.File._get_log_file_path(logdir="/var/log",
                                                         binary="foobar"))
         self.assertEqual("/var/log/foobar.log",
-                         target.File._get_log_file_path(logdir="/var/log",
+                         output.File._get_log_file_path(logdir="/var/log",
                                                         binary="foobar"))
         self.assertEqual("/var/log/foobar.journal",
-                         target.File._get_log_file_path(
+                         output.File._get_log_file_path(
                              logdir="/var/log",
                              logfile_suffix=".journal",
                              binary="foobar"))

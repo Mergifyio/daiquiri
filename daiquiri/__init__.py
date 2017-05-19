@@ -17,7 +17,7 @@ import traceback
 import weakref
 
 from daiquiri import handlers
-from daiquiri import target
+from daiquiri import output
 
 
 class KeywordArgumentAdapter(logging.LoggerAdapter):
@@ -70,13 +70,13 @@ def getLogger(name=None, **kwargs):
     return _LOGGERS[name]
 
 
-def setup(level=logging.INFO, targets=[target.STDERR], binary=None):
+def setup(level=logging.INFO, outputs=[output.STDERR], binary=None):
     """Setup Python logging.
 
     This will setup basic handlers for Python logging.
 
     :param level: Root log level.
-    :param targets: Iterable of targets to log to.
+    :param outputs: Iterable of outputs to log to.
     :param binary: The name of the program. Auto-detected if not set.
     """
     # Sometimes logging occurs before logging is ready
@@ -98,7 +98,7 @@ def setup(level=logging.INFO, targets=[target.STDERR], binary=None):
         root_logger.removeHandler(handler)
 
     # Add configured handlers
-    for t in targets:
-        t.add_to_logger(root_logger)
+    for o in outputs:
+        o.add_to_logger(root_logger)
 
     root_logger.setLevel(level)
