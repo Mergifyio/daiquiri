@@ -9,10 +9,10 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import io
 import json
 import logging
 
+import six.moves
 import testtools
 
 import daiquiri
@@ -25,7 +25,7 @@ class TestDaiquiri(testtools.TestCase):
         daiquiri.setup(binary="foobar")
 
     def test_setup_json_formatter(self):
-        stream = io.StringIO()
+        stream = six.moves.StringIO()
         daiquiri.setup(outputs=(
             daiquiri.output.Stream(
                 stream, formatter=daiquiri.output.JSON_FORMATTER),
