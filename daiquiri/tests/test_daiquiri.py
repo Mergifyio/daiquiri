@@ -9,6 +9,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import io
+import json
 import logging
 
 import testtools
@@ -21,3 +23,13 @@ class TestDaiquiri(testtools.TestCase):
         daiquiri.setup()
         daiquiri.setup(level=logging.DEBUG)
         daiquiri.setup(binary="foobar")
+
+    def test_setup_json_formatter(self):
+        stream = io.StringIO()
+        daiquiri.setup(targets=(
+            daiquiri.target.Stream(
+                stream, formatter=daiquiri.target.JSON_FORMATTER),
+        ))
+        daiquiri.getLogger(__name__).info("foobar")
+        self.assertEqual({"message": "foobar", "color": "", "color_stop": ""},
+                         json.loads(stream.getvalue()))
