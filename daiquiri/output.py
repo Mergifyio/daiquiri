@@ -20,6 +20,7 @@ except ImportError:
 
 from pythonjsonlogger import jsonlogger
 
+from daiquiri import formatter
 from daiquiri import handlers
 
 
@@ -28,7 +29,7 @@ DEFAULT_FORMAT = (
     "%(name)s: %(message)s%(color_stop)s"
 )
 
-TEXT_FORMATTER = logging.Formatter(fmt=DEFAULT_FORMAT)
+TEXT_FORMATTER = formatter.ColorFormatter(fmt=DEFAULT_FORMAT)
 JSON_FORMATTER = jsonlogger.JsonFormatter()
 
 
@@ -87,7 +88,7 @@ class File(Output):
 class Stream(Output):
     def __init__(self, stream=sys.stderr, formatter=TEXT_FORMATTER,
                  level=logging.INFO):
-        super(Stream, self).__init__(handlers.ColorStreamHandler(stream),
+        super(Stream, self).__init__(handlers.TTYDetectorStreamHandler(stream),
                                      formatter, level)
 
 
