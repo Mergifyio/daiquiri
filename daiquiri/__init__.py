@@ -123,7 +123,8 @@ def setup(debug=False,
           format=DEFAULT_FORMAT,
           date_format=None,
           use_journal=False, use_syslog=False,
-          use_stderr=None,
+          streams=None,
+          stderr_fallback=True,
           logfile=None, logdir=None, binary=None,
           syslog_facility="user"):
     """Setup Python logging.
@@ -134,9 +135,8 @@ def setup(debug=False,
     :param format: The default log string format
     :param use_journal: Send log to journald
     :param use_syslog: Send log to syslog
-    :param use_stderr: Write log to stderr
-    If set to `None`, log will only be printed if all other log mechanism
-    are disabled.
+    :param stderr_fallback: Write log to stderr if no other logging was
+    configured.
     :param logfile: The log file to write to.
     :param logdir: The log directory to write to.
     :param binary: Program name. Autodetected by default.
@@ -160,15 +160,20 @@ def setup(debug=False,
 
     logpath = _get_log_file_path(logfile, logdir, binary)
 
-    if logpath or use_journal:
-        if use_journal:
-            root_logger.addHandler(handlers.JournalHandler())
-        if logpath:
-            root_logger.addHandler(
-                logging.handlers.WatchedFileHandler(logpath))
-    else:
-        streamlog = handlers.ColorStreamHandler(sys.stderr)
-        root_logger.addHandler(streamlog)
+    if (stderr_fallback
+       and not (logpath or use_journal or use_syslog or streams)):
+        streams = [sys.stderr]
+
+    if use_journal:
+        root_logger.addHandler(handlers.JournalHandler())
+
+    if logpath:
+        root_logger.addHandler(
+            logging.handlers.WatchedFileHandler(logpath))
+
+    if streams:
+        for s in streams:
+            root_logger.addHandler(handlers.ColorStreamHandler(s))
 
     if use_syslog:
         if syslog is None:
