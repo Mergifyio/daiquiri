@@ -37,12 +37,12 @@ class TestOutput(testtools.TestCase):
                                                         logdir="/var/log/foo"))
         self.assertEqual("/var/log/foobar.log",
                          output.File._get_log_file_path(logdir="/var/log",
-                                                        binary="foobar"))
+                                                        program_name="foobar"))
         self.assertEqual("/var/log/foobar.log",
                          output.File._get_log_file_path(logdir="/var/log",
-                                                        binary="foobar"))
+                                                        program_name="foobar"))
         self.assertEqual("/var/log/foobar.journal",
                          output.File._get_log_file_path(
                              logdir="/var/log",
                              logfile_suffix=".journal",
-                             binary="foobar"))
+                             program_name="foobar"))

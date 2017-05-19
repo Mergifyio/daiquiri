@@ -11,11 +11,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import inspect
 import logging
 import logging.config
 import logging.handlers
-import os
 
 try:
     from systemd import journal
@@ -25,10 +23,6 @@ try:
     import syslog
 except ImportError:
     syslog = None
-
-
-def _get_binary_name():
-    return os.path.basename(inspect.stack()[-1][1])
 
 
 # This is a copy of the numerical constants from syslog.h. The
@@ -48,15 +42,14 @@ SYSLOG_MAP = {
 class SyslogHandler(logging.Handler):
     """Syslog based handler. Only available on UNIX-like platforms."""
 
-    def __init__(self, facility=None):
+    def __init__(self, program_name, facility=None):
         # Default values always get evaluated, for which reason we avoid
         # using 'syslog' directly, which may not be available.
         facility = facility if facility is not None else syslog.LOG_USER
         if not syslog:
             raise RuntimeError("Syslog not available on this platform")
         super(SyslogHandler, self).__init__()
-        binary_name = _get_binary_name()
-        syslog.openlog(binary_name, 0, facility)
+        syslog.openlog(program_name, 0, facility)
 
     def emit(self, record):
         priority = SYSLOG_MAP.get(record.levelname, 7)
@@ -66,11 +59,11 @@ class SyslogHandler(logging.Handler):
 
 class JournalHandler(logging.Handler):
 
-    def __init__(self):
+    def __init__(self, program_name):
         if not journal:
             raise RuntimeError("Systemd bindings do not exist")
         super(SyslogHandler, self).__init__()
-        self.binary_name = _get_binary_name()
+        self.program_name = program_name
 
     def emit(self, record):
         priority = SYSLOG_MAP.get(record.levelname, 7)
@@ -84,7 +77,7 @@ class JournalHandler(logging.Handler):
             'PROCESS_NAME': record.processName,
             'LOGGER_NAME': record.name,
             'LOGGER_LEVEL': record.levelname,
-            'SYSLOG_IDENTIFIER': self.binary_name,
+            'SYSLOG_IDENTIFIER': self.program_name,
             'PRIORITY': priority
         }
 

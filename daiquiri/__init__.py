@@ -16,7 +16,6 @@ import sys
 import traceback
 import weakref
 
-from daiquiri import handlers
 from daiquiri import output
 
 
@@ -70,14 +69,14 @@ def getLogger(name=None, **kwargs):
     return _LOGGERS[name]
 
 
-def setup(level=logging.INFO, outputs=[output.STDERR], binary=None):
+def setup(level=logging.INFO, outputs=[output.STDERR], program_name=None):
     """Setup Python logging.
 
     This will setup basic handlers for Python logging.
 
     :param level: Root log level.
     :param outputs: Iterable of outputs to log to.
-    :param binary: The name of the program. Auto-detected if not set.
+    :param program_name: The name of the program. Auto-detected if not set.
     """
     # Sometimes logging occurs before logging is ready
     # To avoid "No handlers could be found," temporarily log to sys.stderr.
@@ -85,10 +84,8 @@ def setup(level=logging.INFO, outputs=[output.STDERR], binary=None):
     if not root_logger.handlers:
         root_logger.addHandler(logging.StreamHandler())
 
-    binary = binary or handlers._get_binary_name()
-
     def logging_excepthook(exc_type, value, tb):
-        logging.getLogger(binary).critical(
+        logging.getLogger(program_name).critical(
             "".join(traceback.format_exception_only(exc_type, value)))
 
     sys.excepthook = logging_excepthook

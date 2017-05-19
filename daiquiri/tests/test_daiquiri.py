@@ -22,7 +22,7 @@ class TestDaiquiri(testtools.TestCase):
     def test_setup(self):
         daiquiri.setup()
         daiquiri.setup(level=logging.DEBUG)
-        daiquiri.setup(binary="foobar")
+        daiquiri.setup(program_name="foobar")
 
     def test_setup_json_formatter(self):
         stream = six.moves.StringIO()

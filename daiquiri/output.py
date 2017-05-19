@@ -9,6 +9,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import inspect
 import logging
 import os
 import sys
@@ -31,6 +32,10 @@ TEXT_FORMATTER = logging.Formatter(fmt=DEFAULT_FORMAT)
 JSON_FORMATTER = jsonlogger.JsonFormatter()
 
 
+def get_program_name():
+    return os.path.basename(inspect.stack()[-1][1])
+
+
 class Output(object):
     """Generic log output."""
 
@@ -46,26 +51,27 @@ class Output(object):
 
 class File(Output):
     def __init__(self, filename=None, directory=None, suffix=".log",
-                 binary=None, formatter=TEXT_FORMATTER, level=logging.INFO):
+                 program_name=None, formatter=TEXT_FORMATTER,
+                 level=logging.INFO):
         """Log file output.
 
         :param filename: The log file path to write to.
         If directory is also specified, both will be combined.
         :param directory: The log directory to write to.
-        If no filename is specified, the binary name and suffix will be used
+        If no filename is specified, the program name and suffix will be used
         to contruct the full path relative to the directory.
         :param suffix: The log file name suffix.
         This will be only used if no filename has been provided.
-        :param binary: Program name. Autodetected by default.
+        :param program_name: Program name. Autodetected by default.
         """
-        logpath = self._get_log_file_path(filename, directory, binary)
+        logpath = self._get_log_file_path(filename, directory, program_name)
         if not logpath:
             raise ValueError("Unable to determine log file destination")
         handler = logging.handlers.WatchedFileHandler(logpath)
         super(File, self).__init__(handler, formatter, level)
 
     @staticmethod
-    def _get_log_file_path(logfile=None, logdir=None, binary=None,
+    def _get_log_file_path(logfile=None, logdir=None, program_name=None,
                            logfile_suffix=".log"):
         if not logdir:
             return logfile
@@ -74,8 +80,8 @@ class File(Output):
             return os.path.join(logdir, logfile)
 
         if logdir:
-            binary = binary or handlers._get_binary_name()
-            return os.path.join(logdir, binary) + logfile_suffix
+            program_name = program_name or get_program_name()
+            return os.path.join(logdir, program_name) + logfile_suffix
 
 
 class Stream(Output):
@@ -90,19 +96,23 @@ STDOUT = Stream(sys.stdout)
 
 
 class Journal(Output):
-    def __init__(self, formatter=TEXT_FORMATTER, level=logging.INFO):
-        super(Journal, self).__init__(handlers.JournalHandler(),
+    def __init__(self, program_name=None,
+                 formatter=TEXT_FORMATTER, level=logging.INFO):
+        program_name = program_name or get_program_name
+        super(Journal, self).__init__(handlers.JournalHandler(program_name),
                                       formatter, level)
 
 
 class Syslog(Output):
-    def __init__(self, facility="user", formatter=TEXT_FORMATTER,
-                 level=logging.INFO):
+    def __init__(self, program_name=None, facility="user",
+                 formatter=TEXT_FORMATTER, level=logging.INFO):
         if syslog is None:
             # FIXME(jd) raise something more specific
             raise RuntimeError("syslog is not available on this platform")
         super(Syslog, self).__init__(
-            handlers.SyslogHandler(facility=self._find_facility(facility)),
+            handlers.SyslogHandler(
+                program_name=program_name or get_program_name(),
+                facility=self._find_facility(facility)),
             formatter, level)
 
     @staticmethod
