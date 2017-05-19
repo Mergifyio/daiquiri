@@ -29,11 +29,17 @@ logging with the options passed as keyword arguments.
 
 .. literalinclude:: examples/basic.py
 
+You can specify different outputs with different formatters, the default being
+text based:
+
+.. literalinclude:: examples/outputs.py
+
 While it's not mandatory to use `daiquiri.getLogger` to get a logger instead of
 `logging.getLogger`, it is recommended as daiquiri provides an enhanced version
 of the logger. It allows any keyword argument to be passed to the logging
 method and that will be available as part of the record.
 
+.. literalinclude:: examples/extra.py
 
 Syslog support
 --------------
