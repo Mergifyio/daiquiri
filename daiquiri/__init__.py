@@ -99,3 +99,25 @@ def setup(level=logging.INFO, outputs=[output.STDERR], program_name=None):
         o.add_to_logger(root_logger)
 
     root_logger.setLevel(level)
+
+
+def parse_and_set_default_log_levels(default_log_levels, separator='='):
+    """Set default log levels for some loggers.
+
+    :param default_log_levels: List of strings with format
+    <logger_name><separator><log_level>
+
+    """
+    return set_default_log_levels((pair.split(separator, 1)
+                                   for pair in default_log_levels))
+
+
+def set_default_log_levels(loggers_and_log_levels):
+    """Set default log levels for some loggers.
+
+    :param loggers_and_log_levels: List of tuple (logger name, level).
+    """
+    for logger, level in loggers_and_log_levels:
+        if isinstance(level, str):
+            level = level.upper()
+        logging.getLogger(logger).setLevel(level)

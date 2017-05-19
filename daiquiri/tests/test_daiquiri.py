@@ -33,3 +33,11 @@ class TestDaiquiri(testtools.TestCase):
         daiquiri.getLogger(__name__).info("foobar")
         self.assertEqual({"message": "foobar"},
                          json.loads(stream.getvalue()))
+
+    def test_set_default_log_levels(self):
+        daiquiri.set_default_log_levels((("amqp", "debug"),
+                                         ("urllib3", "warn")))
+
+    def test_parse_and_set_default_log_levels(self):
+        daiquiri.parse_and_set_default_log_levels(
+            ("urllib3=warn", "foobar=debug"))
