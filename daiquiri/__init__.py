@@ -12,16 +12,12 @@
 import logging
 import logging.config
 import logging.handlers
-import os
 import sys
-try:
-    import syslog
-except ImportError:
-    syslog = None
 import traceback
 import weakref
 
 from daiquiri import handlers
+from daiquiri import target
 
 
 class KeywordArgumentAdapter(logging.LoggerAdapter):
@@ -74,79 +70,22 @@ def getLogger(name=None, **kwargs):
     return _LOGGERS[name]
 
 
-def _get_log_file_path(logfile=None, logdir=None, binary=None,
-                       logfile_suffix=".log"):
-    if not logdir:
-        return logfile
-
-    if logfile and logdir:
-        return os.path.join(logdir, logfile)
-
-    if logdir:
-        binary = binary or handlers._get_binary_name()
-        return os.path.join(logdir, binary) + logfile_suffix
-
-
-def _find_facility(facility):
-    # NOTE(jd): Check the validity of facilities at run time as they differ
-    # depending on the OS and Python version being used.
-    valid_facilities = [f for f in
-                        ["LOG_KERN", "LOG_USER", "LOG_MAIL",
-                         "LOG_DAEMON", "LOG_AUTH", "LOG_SYSLOG",
-                         "LOG_LPR", "LOG_NEWS", "LOG_UUCP",
-                         "LOG_CRON", "LOG_AUTHPRIV", "LOG_FTP",
-                         "LOG_LOCAL0", "LOG_LOCAL1", "LOG_LOCAL2",
-                         "LOG_LOCAL3", "LOG_LOCAL4", "LOG_LOCAL5",
-                         "LOG_LOCAL6", "LOG_LOCAL7"]
-                        if getattr(syslog, f, None)]
-
-    facility = facility.upper()
-
-    if not facility.startswith("LOG_"):
-        facility = "LOG_" + facility
-
-    if facility not in valid_facilities:
-        raise TypeError('syslog facility must be one of: %s' %
-                        ', '.join("'%s'" % fac
-                                  for fac in valid_facilities))
-
-    return getattr(syslog, facility)
-
-
-DEFAULT_FORMAT = (
-    "%(asctime)s [%(process)d] %(color)s%(levelname)s "
-    "%(name)s: %(message)s%(color_stop)s"
-)
-
-
-def setup(debug=False,
-          format=DEFAULT_FORMAT,
-          date_format=None,
-          use_journal=False, use_syslog=False,
-          streams=None,
-          stderr_fallback=True,
-          logfile=None, logdir=None, binary=None,
-          syslog_facility="user"):
+def setup(level=logging.INFO, targets=[target.STDERR], binary=None):
     """Setup Python logging.
 
     This will setup basic handlers for Python logging.
 
-    :param debug: Enable debug log level
-    :param format: The default log string format
-    :param use_journal: Send log to journald
-    :param use_syslog: Send log to syslog
-    :param stderr_fallback: Write log to stderr if no other logging was
-    configured.
-    :param logfile: The log file to write to.
-    :param logdir: The log directory to write to.
-    :param binary: Program name. Autodetected by default.
-    :param syslog_facility: The syslog facility to use.
+    :param level: Root log level.
+    :param targets: Iterable of targets to log to.
+    :param binary: The name of the program. Auto-detected if not set.
     """
     # Sometimes logging occurs before logging is ready
     # To avoid "No handlers could be found," temporarily log to sys.stderr.
     root_logger = logging.getLogger(None)
     if not root_logger.handlers:
         root_logger.addHandler(logging.StreamHandler())
+
+    binary = binary or handlers._get_binary_name()
 
     def logging_excepthook(exc_type, value, tb):
         logging.getLogger(binary).critical(
@@ -158,35 +97,8 @@ def setup(debug=False,
     for handler in list(root_logger.handlers):
         root_logger.removeHandler(handler)
 
-    logpath = _get_log_file_path(logfile, logdir, binary)
+    # Add configured handlers
+    for t in targets:
+        t.add_to_logger(root_logger)
 
-    if (stderr_fallback
-       and not (logpath or use_journal or use_syslog or streams)):
-        streams = [sys.stderr]
-
-    if use_journal:
-        root_logger.addHandler(handlers.JournalHandler())
-
-    if logpath:
-        root_logger.addHandler(
-            logging.handlers.WatchedFileHandler(logpath))
-
-    if streams:
-        for s in streams:
-            root_logger.addHandler(handlers.ColorStreamHandler(s))
-
-    if use_syslog:
-        if syslog is None:
-            raise RuntimeError("syslog is not available on this platform")
-        facility = _find_facility(syslog_facility)
-        syslog_handler = handlers.SyslogHandler(facility=facility)
-        root_logger.addHandler(syslog_handler)
-
-    for handler in root_logger.handlers:
-        handler.setFormatter(logging.Formatter(fmt=format,
-                                               datefmt=date_format))
-
-    if debug:
-        root_logger.setLevel(logging.DEBUG)
-    else:
-        root_logger.setLevel(logging.INFO)
+    root_logger.setLevel(level)
