@@ -11,6 +11,17 @@
 #    under the License.
 import logging
 
+try:
+    from pythonjsonlogger import jsonlogger
+except ImportError:
+    jsonlogger = None
+
+
+DEFAULT_FORMAT = (
+    "%(asctime)s [%(process)d] %(color)s%(levelname)s "
+    "%(name)s: %(message)s%(color_stop)s"
+)
+
 
 class ColorFormatter(logging.Formatter):
     # TODO(jd) Allow configuration
@@ -35,3 +46,8 @@ class ColorFormatter(logging.Formatter):
         del record.color
         del record.color_stop
         return s
+
+
+TEXT_FORMATTER = ColorFormatter(fmt=DEFAULT_FORMAT)
+if jsonlogger:
+    JSON_FORMATTER = jsonlogger.JsonFormatter()

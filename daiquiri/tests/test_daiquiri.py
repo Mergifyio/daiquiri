@@ -28,7 +28,7 @@ class TestDaiquiri(testtools.TestCase):
         stream = six.moves.StringIO()
         daiquiri.setup(outputs=(
             daiquiri.output.Stream(
-                stream, formatter=daiquiri.output.JSON_FORMATTER),
+                stream, formatter=daiquiri.formatter.JSON_FORMATTER),
         ))
         daiquiri.getLogger(__name__).info("foobar")
         self.assertEqual({"message": "foobar"},

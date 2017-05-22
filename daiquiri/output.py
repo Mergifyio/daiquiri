@@ -18,19 +18,8 @@ try:
 except ImportError:
     syslog = None
 
-from pythonjsonlogger import jsonlogger
-
 from daiquiri import formatter
 from daiquiri import handlers
-
-
-DEFAULT_FORMAT = (
-    "%(asctime)s [%(process)d] %(color)s%(levelname)s "
-    "%(name)s: %(message)s%(color_stop)s"
-)
-
-TEXT_FORMATTER = formatter.ColorFormatter(fmt=DEFAULT_FORMAT)
-JSON_FORMATTER = jsonlogger.JsonFormatter()
 
 
 def get_program_name():
@@ -40,7 +29,8 @@ def get_program_name():
 class Output(object):
     """Generic log output."""
 
-    def __init__(self, handler, formatter=TEXT_FORMATTER, level=logging.INFO):
+    def __init__(self, handler, formatter=formatter.TEXT_FORMATTER,
+                 level=logging.INFO):
         self.handler = handler
         self.handler.setFormatter(formatter)
         self.handler.setLevel(level)
@@ -52,7 +42,7 @@ class Output(object):
 
 class File(Output):
     def __init__(self, filename=None, directory=None, suffix=".log",
-                 program_name=None, formatter=TEXT_FORMATTER,
+                 program_name=None, formatter=formatter.TEXT_FORMATTER,
                  level=logging.INFO):
         """Log file output.
 
@@ -86,7 +76,7 @@ class File(Output):
 
 
 class Stream(Output):
-    def __init__(self, stream=sys.stderr, formatter=TEXT_FORMATTER,
+    def __init__(self, stream=sys.stderr, formatter=formatter.TEXT_FORMATTER,
                  level=logging.INFO):
         super(Stream, self).__init__(handlers.TTYDetectorStreamHandler(stream),
                                      formatter, level)
@@ -98,7 +88,7 @@ STDOUT = Stream(sys.stdout)
 
 class Journal(Output):
     def __init__(self, program_name=None,
-                 formatter=TEXT_FORMATTER, level=logging.INFO):
+                 formatter=formatter.TEXT_FORMATTER, level=logging.INFO):
         program_name = program_name or get_program_name
         super(Journal, self).__init__(handlers.JournalHandler(program_name),
                                       formatter, level)
@@ -106,7 +96,7 @@ class Journal(Output):
 
 class Syslog(Output):
     def __init__(self, program_name=None, facility="user",
-                 formatter=TEXT_FORMATTER, level=logging.INFO):
+                 formatter=formatter.TEXT_FORMATTER, level=logging.INFO):
         if syslog is None:
             # FIXME(jd) raise something more specific
             raise RuntimeError("syslog is not available on this platform")

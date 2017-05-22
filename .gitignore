@@ -8,3 +8,4 @@ dist
 # pbr generates these
 AUTHORS
 ChangeLog
+doc/build
