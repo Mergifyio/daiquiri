@@ -30,10 +30,11 @@ class Output(object):
     """Generic log output."""
 
     def __init__(self, handler, formatter=formatter.TEXT_FORMATTER,
-                 level=logging.INFO):
+                 level=None):
         self.handler = handler
         self.handler.setFormatter(formatter)
-        self.handler.setLevel(level)
+        if level is not None:
+            self.handler.setLevel(level)
 
     def add_to_logger(self, logger):
         """Add this output to a logger."""
@@ -43,7 +44,7 @@ class Output(object):
 class File(Output):
     def __init__(self, filename=None, directory=None, suffix=".log",
                  program_name=None, formatter=formatter.TEXT_FORMATTER,
-                 level=logging.INFO):
+                 level=None):
         """Log file output.
 
         :param filename: The log file path to write to.
@@ -77,7 +78,7 @@ class File(Output):
 
 class Stream(Output):
     def __init__(self, stream=sys.stderr, formatter=formatter.TEXT_FORMATTER,
-                 level=logging.INFO):
+                 level=None):
         super(Stream, self).__init__(handlers.TTYDetectorStreamHandler(stream),
                                      formatter, level)
 
@@ -88,7 +89,7 @@ STDOUT = Stream(sys.stdout)
 
 class Journal(Output):
     def __init__(self, program_name=None,
-                 formatter=formatter.TEXT_FORMATTER, level=logging.INFO):
+                 formatter=formatter.TEXT_FORMATTER, level=None):
         program_name = program_name or get_program_name
         super(Journal, self).__init__(handlers.JournalHandler(program_name),
                                       formatter, level)
@@ -96,7 +97,7 @@ class Journal(Output):
 
 class Syslog(Output):
     def __init__(self, program_name=None, facility="user",
-                 formatter=formatter.TEXT_FORMATTER, level=logging.INFO):
+                 formatter=formatter.TEXT_FORMATTER, level=None):
         if syslog is None:
             # FIXME(jd) raise something more specific
             raise RuntimeError("syslog is not available on this platform")
