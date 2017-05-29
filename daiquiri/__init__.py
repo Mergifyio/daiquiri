@@ -69,14 +69,16 @@ def getLogger(name=None, **kwargs):
     return _LOGGERS[name]
 
 
-def setup(level=logging.INFO, outputs=[output.STDERR], program_name=None):
+def setup(level=logging.INFO, outputs=[output.STDERR], program_name=None,
+          root_level=logging.WARNING):
     """Setup Python logging.
 
     This will setup basic handlers for Python logging.
 
-    :param level: Root log level.
+    :param level: Program log level.
     :param outputs: Iterable of outputs to log to.
     :param program_name: The name of the program. Auto-detected if not set.
+    :param root_level: The logging level for the root logger.
     """
     # Sometimes logging occurs before logging is ready
     # To avoid "No handlers could be found," temporarily log to sys.stderr.
@@ -84,8 +86,11 @@ def setup(level=logging.INFO, outputs=[output.STDERR], program_name=None):
     if not root_logger.handlers:
         root_logger.addHandler(logging.StreamHandler())
 
+    program_name = program_name or output.get_program_name()
+    program_logger = logging.getLogger(program_name)
+
     def logging_excepthook(exc_type, value, tb):
-        logging.getLogger(program_name).critical(
+        program_logger.critical(
             "".join(traceback.format_exception_only(exc_type, value)))
 
     sys.excepthook = logging_excepthook
@@ -98,7 +103,8 @@ def setup(level=logging.INFO, outputs=[output.STDERR], program_name=None):
     for o in outputs:
         o.add_to_logger(root_logger)
 
-    root_logger.setLevel(level)
+    root_logger.setLevel(root_level)
+    program_logger.setLevel(level)
 
 
 def parse_and_set_default_log_levels(default_log_levels, separator='='):
