@@ -30,7 +30,7 @@ class TestDaiquiri(testtools.TestCase):
             daiquiri.output.Stream(
                 stream, formatter=daiquiri.formatter.JSON_FORMATTER),
         ))
-        daiquiri.getLogger(__name__).critical("foobar")
+        daiquiri.getLogger(__name__).info("foobar")
         self.assertEqual({"message": "foobar"},
                          json.loads(stream.getvalue()))
 
