@@ -69,7 +69,7 @@ def getLogger(name=None, **kwargs):
     return _LOGGERS[name]
 
 
-def setup(level=logging.INFO, outputs=[output.STDERR], program_name=None):
+def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None):
     """Setup Python logging.
 
     This will setup basic handlers for Python logging.
