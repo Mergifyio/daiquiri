@@ -86,7 +86,7 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None):
 
     def logging_excepthook(exc_type, value, tb):
         logging.getLogger(program_name).critical(
-            "".join(traceback.format_exception_only(exc_type, value)))
+            "".join(traceback.format_exception(exc_type, value, tb)))
 
     sys.excepthook = logging_excepthook
 
