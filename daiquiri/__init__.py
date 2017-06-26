@@ -84,8 +84,10 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None):
     if not root_logger.handlers:
         root_logger.addHandler(logging.StreamHandler())
 
+    program_logger = logging.getLogger(program_name)
+
     def logging_excepthook(exc_type, value, tb):
-        logging.getLogger(program_name).critical(
+        program_logger.critical(
             "".join(traceback.format_exception(exc_type, value, tb)))
 
     sys.excepthook = logging_excepthook
