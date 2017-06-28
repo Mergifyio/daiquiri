@@ -78,19 +78,7 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None):
     :param outputs: Iterable of outputs to log to.
     :param program_name: The name of the program. Auto-detected if not set.
     """
-    # Sometimes logging occurs before logging is ready
-    # To avoid "No handlers could be found," temporarily log to sys.stderr.
     root_logger = logging.getLogger(None)
-    if not root_logger.handlers:
-        root_logger.addHandler(logging.StreamHandler())
-
-    program_logger = logging.getLogger(program_name)
-
-    def logging_excepthook(exc_type, value, tb):
-        program_logger.critical(
-            "".join(traceback.format_exception(exc_type, value, tb)))
-
-    sys.excepthook = logging_excepthook
 
     # Remove all handlers
     for handler in list(root_logger.handlers):
@@ -101,6 +89,14 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None):
         o.add_to_logger(root_logger)
 
     root_logger.setLevel(level)
+
+    program_logger = logging.getLogger(program_name)
+
+    def logging_excepthook(exc_type, value, tb):
+        program_logger.critical(
+            "".join(traceback.format_exception(exc_type, value, tb)))
+
+    sys.excepthook = logging_excepthook
 
 
 def parse_and_set_default_log_levels(default_log_levels, separator='='):
