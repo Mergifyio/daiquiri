@@ -61,12 +61,13 @@ def getLogger(name=None, **kwargs):
                  name, ``__name__``.
     :type name: string
     """
-    if name not in _LOGGERS:
+    adapter = _LOGGERS.get(name)
+    if not adapter:
         # NOTE(jd) Keep using the `adapter' variable here because so it's not
         # collected by Python since _LOGGERS contains only a weakref
         adapter = KeywordArgumentAdapter(logging.getLogger(name), kwargs)
         _LOGGERS[name] = adapter
-    return _LOGGERS[name]
+    return adapter
 
 
 def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None):
