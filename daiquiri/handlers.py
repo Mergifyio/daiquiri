@@ -99,7 +99,10 @@ class TTYDetectorStreamHandler(logging.StreamHandler):
     """Stream handler that adds a hint in the record if the stream is a TTY."""
 
     def format(self, record):
-        record._stream_is_a_tty = self.stream.isatty()
+        if hasattr(self.stream, "isatty"):
+            record._stream_is_a_tty = self.stream.isatty()
+        else:
+            record._stream_is_a_tty = False
         s = super(TTYDetectorStreamHandler, self).format(record)
         del record._stream_is_a_tty
         return s
