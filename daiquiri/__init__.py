@@ -70,7 +70,8 @@ def getLogger(name=None, **kwargs):
     return adapter
 
 
-def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None):
+def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
+          capture_warnings=True):
     """Setup Python logging.
 
     This will setup basic handlers for Python logging.
@@ -78,6 +79,7 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None):
     :param level: Root log level.
     :param outputs: Iterable of outputs to log to.
     :param program_name: The name of the program. Auto-detected if not set.
+    :param capture_warnings: Capture warnings from the `warnings' module
     """
     root_logger = logging.getLogger(None)
 
@@ -98,6 +100,9 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None):
             "".join(traceback.format_exception(exc_type, value, tb)))
 
     sys.excepthook = logging_excepthook
+
+    if capture_warnings:
+        logging.captureWarnings(True)
 
 
 def parse_and_set_default_log_levels(default_log_levels, separator='='):

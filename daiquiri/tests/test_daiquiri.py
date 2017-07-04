@@ -11,6 +11,7 @@
 #    under the License.
 import json
 import logging
+import warnings
 
 import six.moves
 import testtools
@@ -19,6 +20,11 @@ import daiquiri
 
 
 class TestDaiquiri(testtools.TestCase):
+    def tearDown(self):
+        # Be sure to reset the warning capture
+        logging.captureWarnings(False)
+        super(TestDaiquiri, self).tearDown()
+
     def test_setup(self):
         daiquiri.setup()
         daiquiri.setup(level=logging.DEBUG)
@@ -33,6 +39,25 @@ class TestDaiquiri(testtools.TestCase):
         daiquiri.getLogger(__name__).warning("foobar")
         self.assertEqual({"message": "foobar"},
                          json.loads(stream.getvalue()))
+
+    def test_capture_warnings(self):
+        stream = six.moves.StringIO()
+        daiquiri.setup(outputs=(
+            daiquiri.output.Stream(stream),
+        ))
+        warnings.warn("omg!")
+        self.assertIn("WARNING py.warnings: "
+                      "daiquiri/tests/test_daiquiri.py:48: "
+                      "UserWarning: omg!\n  warnings.warn(\"omg!\")\n",
+                      stream.getvalue())
+
+    def test_no_capture_warnings(self):
+        stream = six.moves.StringIO()
+        daiquiri.setup(outputs=(
+            daiquiri.output.Stream(stream),
+        ), capture_warnings=False)
+        warnings.warn("omg!")
+        self.assertEqual("", stream.getvalue())
 
     def test_set_default_log_levels(self):
         daiquiri.set_default_log_levels((("amqp", "debug"),
