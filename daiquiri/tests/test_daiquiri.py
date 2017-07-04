@@ -47,7 +47,7 @@ class TestDaiquiri(testtools.TestCase):
         ))
         warnings.warn("omg!")
         line = stream.getvalue()
-        self.assertIn("WARNING py.warnings: ", line)
+        self.assertIn("WARNING  py.warnings: ", line)
         self.assertIn("daiquiri/tests/test_daiquiri.py:48: "
                       "UserWarning: omg!\n  warnings.warn(\"omg!\")\n",
                       line)
