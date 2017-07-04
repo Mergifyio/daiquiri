@@ -46,10 +46,11 @@ class TestDaiquiri(testtools.TestCase):
             daiquiri.output.Stream(stream),
         ))
         warnings.warn("omg!")
-        self.assertIn("WARNING py.warnings: "
-                      "daiquiri/tests/test_daiquiri.py:48: "
+        line = stream.getvalue()
+        self.assertIn("WARNING py.warnings: ", line)
+        self.assertIn("daiquiri/tests/test_daiquiri.py:48: "
                       "UserWarning: omg!\n  warnings.warn(\"omg!\")\n",
-                      stream.getvalue())
+                      line)
 
     def test_no_capture_warnings(self):
         stream = six.moves.StringIO()
