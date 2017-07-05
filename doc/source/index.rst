@@ -45,7 +45,8 @@ Picking format
 You can configure the format of any output by passing a formatter to as the
 `formatter` argument to the contructor. Two default formatter are available:
 `daiquiri.formatter.TEXT_FORMATTER` which prints log messages as text, and the
-`daiquiri.formatter.JSON_FORMATTER` which prints log messages as parsable JSON.
+`daiquiri.formatter.JSON_FORMATTER` which prints log messages as parsable JSON
+(requires `python-json-logger`).
 
 You can provide any class of type `logging.Formatter` as a formatter.
 
