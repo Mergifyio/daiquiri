@@ -18,7 +18,7 @@ except ImportError:
 
 
 DEFAULT_FORMAT = (
-    "%(asctime)s [%(process)d] %(color)s%(levelname)s "
+    "%(asctime)s [%(process)d] %(color)s%(levelname)-8.8s "
     "%(name)s: %(message)s%(color_stop)s"
 )
 
