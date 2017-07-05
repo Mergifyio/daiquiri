@@ -1,6 +1,6 @@
 import daiquiri
-import sys
 import logging
+import sys
 
 # Log both to stdout and as JSON in a file called /dev/null. (Requires
 # `python-json-logger`)
