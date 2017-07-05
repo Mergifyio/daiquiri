@@ -17,6 +17,7 @@ import traceback
 import weakref
 
 from daiquiri import output
+from daiquiri import formatter
 
 
 class KeywordArgumentAdapter(logging.LoggerAdapter):
@@ -71,7 +72,7 @@ def getLogger(name=None, **kwargs):
 
 
 def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
-          capture_warnings=True):
+          capture_warnings=True, palette=None):
     """Setup Python logging.
 
     This will setup basic handlers for Python logging.
@@ -79,7 +80,8 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
     :param level: Root log level.
     :param outputs: Iterable of outputs to log to.
     :param program_name: The name of the program. Auto-detected if not set.
-    :param capture_warnings: Capture warnings from the `warnings' module
+    :param capture_warnings: Capture warnings from the `warnings' module.
+    :param palette: Object instance that represents TTY color palette.
     """
     root_logger = logging.getLogger(None)
 
@@ -89,6 +91,11 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
 
     # Add configured handlers
     for o in outputs:
+        # modify the color palette if it's defined via setup
+        if palette is not None:
+            o_palette = getattr(o.handler.formatter, 'palette', None)
+            if o_palette:
+                setattr(o.handler.formatter, 'palette', palette)
         o.add_to_logger(root_logger)
 
     root_logger.setLevel(level)
