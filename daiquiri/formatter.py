@@ -12,12 +12,7 @@
 import logging
 
 import six
-
-
-if six.PY3:
-    from itertools import zip_longest as zipl
-else:
-    from itertools import izip_longest as zipl
+from six.moves import zip_longest
 
 try:
     from pythonjsonlogger import jsonlogger
@@ -34,14 +29,18 @@ DEFAULT_FORMAT = (
 class Palette(object):
     """Object that represents TTY colors."""
 
-    PREFIX = '\033['
-    BASE_WHITE = 15
-    BASE_MOD = '00;%dm'
-    CHART_WHITE = 231
-    CHART_MOD = '38;5;%dm'
+    PREFIX = '\033['        # TTY prefix for a color code
+    BASE_WHITE = 15         # default colors index 15 is white
+    BASE_MOD = '00;%dm'     # default colors format is `00;00m`
+    CHART_WHITE = 231       # 256-table colors index 231 is white
+    CHART_MOD = '38;5;%dm'  # 256-table colors format is `38;5;00m` for foreground
 
     def __init__(self, *args, base=False, name=None):
         """Create a new color palette from console values.
+
+        Each argument (in `args`) corresponds to a logging level, ordered by
+        severity. A standard, default, palette will have five arguments that
+        represent levels: debug, info, warning, error, and critical.
 
         :param args: a color value for each of the default logging levels.
         :param base: (bool) use TTY defined colors instead of 256-color palette.
@@ -52,18 +51,31 @@ class Palette(object):
         self._level_colors = None
 
     def __str__(self):
-        colors = [c[1] if not isinstance(c, int) else c for c in self.colors]
+        colors = (c[1] if not isinstance(c, int) else c for c in self.colors)
         return '<Palette %s(%s)>' % (self.name if self.name else '',
                                      ', '.join(map(str, colors)))
 
     @property
     def level_colors(self):
+        """Mapping of log levels to color prefixes.
+
+        :rtype: dict
+        """
         # deferred processing, read only
         if self._level_colors is None:
             self._level_colors = self._process_colors()
         return self._level_colors
 
     def _process_colors(self):
+        """Process mapping of log levels.
+
+        :rtype: dict
+        """
+
+        def _normal(n):
+            # method that mirrors the format of bold/underline
+            return '0;%s', n
+
         ret = {}
         # account for custom logging levels, with potential additional colors
         logging_levels = tuple(sorted(logging._levelToName.keys(), reverse=False))
@@ -72,7 +84,7 @@ class Palette(object):
         white = self.BASE_WHITE if self.base else self.CHART_WHITE
 
         # create a tuple pair for each level and the palette's colors
-        colors = zipl(logging_levels, [white] + self.colors, fillvalue=white)
+        colors = zip_longest(logging_levels, [white] + self.colors, fillvalue=white)
 
         # apply text formatting
         for level, color in colors:
@@ -81,7 +93,7 @@ class Palette(object):
                 fmt, c_num = color
             elif isinstance(color, int):
                 # no formatting
-                fmt, c_num = normal(color)
+                fmt, c_num = _normal(color)
             else:
                 raise ValueError(color)
 
@@ -92,32 +104,31 @@ class Palette(object):
             ret[level] = '%s%s' % (self.PREFIX, fmt % c)
         return ret
 
+    @staticmethod
+    def bold(n):
+        """Bold color in Palette.
 
-def bold(n):
-    """Bold color in Palette.
+        :param n: (int)
+        :rtype: tuple
+        """
+        return '1;%s', n
 
-    :param n: (int)
-    """
-    return '1;%s', n
+    @staticmethod
+    def underline(n):
+        """Underline color in Palette.
 
-
-def normal(n):
-    """Normal, no decorations, color in Palette.
-
-    :param n: (int)
-    """
-    return '0;%s', n
-
-
-def underline(n):
-    """Underline color in Palette.
-
-    :param n: (int)
-    """
-    return '4;%s', n
+        :param n: (int)
+        :rtype: tuple
+        """
+        return '4;%s', n
 
 
 class SwatchMeta(type):
+    """Swatches type.
+
+    Used for attaching the palette name, defined in the Swatches
+    object, to the Palette instance.
+    """
     def __new__(cls, name, bases, dct):
         for k, v in dct.items():
             if isinstance(v, Palette):
@@ -127,30 +138,28 @@ class SwatchMeta(type):
 
 class Swatches(six.with_metaclass(SwatchMeta, object)):
     """ Collection of default colors. """
-    Default = Palette(32, 36, bold(33), bold(31), bold(31), base=True)
 
-    Bright = Palette(226, 220, 214, 202, bold(196))
-    Blue = Palette(39, 32, 25, 24, bold(23))
-    Cool = Palette(33, 45, 172, 203, bold(125))
-    Purple = Palette(183, 141, 171, 90, bold(57))
-    Warm = Palette(184, 154, 202, 208, bold(160))
+    # colors from the user defined tty color palette
+    Default = Palette(32, 36, Palette.bold(33), Palette.bold(31), Palette.bold(31), base=True)
+
+    # colors from the 256-color table
+    Blue = Palette(39, 32, 25, 24, Palette.bold(23))
+    Bright = Palette(226, 220, 214, 202, Palette.bold(196))
+    Cool = Palette(33, 45, 172, 203, Palette.bold(125))
+    Purple = Palette(183, 141, 171, 90, Palette.bold(57))
+    Warm = Palette(184, 154, 202, 208, Palette.bold(160))
 
 
 class ColorFormatter(logging.Formatter):
-    LEVEL_COLORS = None
     COLOR_STOP = '\033[0m'
 
-    def __init__(self, fmt=None, datefmt=None, style='%', palette=Swatches.Default):
-        super(ColorFormatter, self).__init__(fmt, datefmt, style)
+    def __init__(self, fmt=None, datefmt=None, palette=Swatches.Default):
+        super(ColorFormatter, self).__init__(fmt, datefmt)
         self.palette = palette
 
     def format(self, record):
-        if self.LEVEL_COLORS is None:
-            palette = getattr(self, 'palette', Swatches.Default)
-            self.LEVEL_COLORS = dict(palette.level_colors)
-
         if getattr(record, "_stream_is_a_tty", False):
-            record.color = self.LEVEL_COLORS[record.levelno]
+            record.color = self.palette.level_colors[record.levelno]
             record.color_stop = self.COLOR_STOP
         else:
             record.color = ""
