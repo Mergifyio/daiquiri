@@ -12,7 +12,6 @@
 import logging
 
 import six
-from six.moves import zip_longest
 
 try:
     from pythonjsonlogger import jsonlogger
