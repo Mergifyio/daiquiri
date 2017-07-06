@@ -26,7 +26,7 @@ flavor::
 
   pip install daiquiri[json]
 
-If you want to eanble systemd support, you must install the `systemd` flavor::
+If you want to enable systemd support, you must install the `systemd` flavor::
 
   pip install daiquiri[systemd]
 
