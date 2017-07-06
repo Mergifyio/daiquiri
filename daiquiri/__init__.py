@@ -16,8 +16,8 @@ import sys
 import traceback
 import weakref
 
-from daiquiri import output
 from daiquiri import formatter
+from daiquiri import output
 
 
 class KeywordArgumentAdapter(logging.LoggerAdapter):

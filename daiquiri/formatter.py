@@ -33,21 +33,32 @@ class Palette(object):
     BASE_WHITE = 15         # default colors index 15 is white
     BASE_MOD = '00;%dm'     # default colors format is `00;00m`
     CHART_WHITE = 231       # 256-table colors index 231 is white
-    CHART_MOD = '38;5;%dm'  # 256-table colors format is `38;5;00m` for foreground
+    CHART_MOD = '38;5;%dm'  # 256-table foreground `38;5;00m`
 
-    def __init__(self, *args, base=False, name=None):
+    LOG_LEVELS = (
+        logging.DEBUG,
+        logging.INFO,
+        logging.WARN,
+        logging.ERROR,
+        logging.CRITICAL,
+    )
+
+    def __init__(self, debug, info, warn, error, critical,
+                 base=False, name=None):
         """Create a new color palette from console values.
 
-        Each argument (in `args`) corresponds to a logging level, ordered by
-        severity. A standard, default, palette will have five arguments that
-        represent levels: debug, info, warning, error, and critical.
+        Each argument (in `args`) corresponds to a logging level's color.
 
-        :param args: a color value for each of the default logging levels.
-        :param base: (bool) use TTY defined colors instead of 256-color palette.
+        :param debug: color for debug level
+        :param info: color for info level
+        :param warn: color for warning level
+        :param error: color for error level
+        :param critical: color for critical level
+        :param base: (bool) use TTY defined colors instead of 256-color palette
         """
         self.name = name
         self.base = base
-        self.colors = list(args)
+        self.colors = (debug, info, warn, error, critical)
         self._level_colors = None
 
     def __str__(self):
@@ -71,29 +82,15 @@ class Palette(object):
 
         :rtype: dict
         """
-
-        def _normal(n):
-            # method that mirrors the format of bold/underline
-            return '0;%s', n
-
         ret = {}
-        # account for custom logging levels, with potential additional colors
-        logging_levels = tuple(sorted(logging._levelToName.keys(), reverse=False))
-
-        # use `white` for all levels that extend beyond the palette's values
-        white = self.BASE_WHITE if self.base else self.CHART_WHITE
-
-        # create a tuple pair for each level and the palette's colors
-        colors = zip_longest(logging_levels, [white] + self.colors, fillvalue=white)
-
         # apply text formatting
-        for level, color in colors:
+        for level, color in zip(self.LOG_LEVELS, self.colors):
             if isinstance(color, tuple):
                 # text-decoration modifier
                 fmt, c_num = color
             elif isinstance(color, int):
                 # no formatting
-                fmt, c_num = _normal(color)
+                fmt, c_num = '0;%s', color
             else:
                 raise ValueError(color)
 
@@ -137,10 +134,11 @@ class SwatchMeta(type):
 
 
 class Swatches(six.with_metaclass(SwatchMeta, object)):
-    """ Collection of default colors. """
+    """Collection of default colors. """
 
     # colors from the user defined tty color palette
-    Default = Palette(32, 36, Palette.bold(33), Palette.bold(31), Palette.bold(31), base=True)
+    Default = Palette(32, 36, Palette.bold(33), Palette.bold(31),
+                      Palette.bold(31), base=True)
 
     # colors from the 256-color table
     Blue = Palette(39, 32, 25, 24, Palette.bold(23))
