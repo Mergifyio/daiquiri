@@ -1,9 +1,10 @@
 import daiquiri
+import logging
 import sys
 
 # Log both to stdout and as JSON in a file called /dev/null. (Requires
 # `python-json-logger`)
-daiquiri.setup(outputs=(
+daiquiri.setup(level=logging.INFO, outputs=(
     daiquiri.output.Stream(sys.stdout),
     daiquiri.output.File("/dev/null",
                          formatter=daiquiri.formatter.JSON_FORMATTER),
