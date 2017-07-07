@@ -13,6 +13,7 @@ import datetime
 import inspect
 import logging
 import logging.handlers
+import numbers
 import os
 import sys
 try:
@@ -61,21 +62,6 @@ def _get_log_file_path(logfile=None, logdir=None, program_name=None,
         raise ValueError("Unable to determine log file destination")
 
     return ret_path
-
-
-def _timedelta_to_seconds(td):
-    """Convert a datetime.timedelta object into a seconds interval for rotating
-    file ouput.
-
-    :param td: datetime.timedelta
-    :return: time in seconds
-    :rtype: int
-    """
-    if isinstance(td, (int, float)):
-        td = datetime.timedelta(seconds=td)
-    if not isinstance(td, datetime.timedelta):
-        raise ValueError(td)
-    return td.total_seconds()
 
 
 class File(Output):
@@ -132,7 +118,7 @@ class RotatingFile(Output):
 class TimedRotatingFile(Output):
     def __init__(self, filename=None, directory=None, suffix='.log',
                  program_name=None, formatter=formatter.TEXT_FORMATTER,
-                 level=None, interval=datetime.timedelta(hours=8),
+                 level=None, interval=datetime.timedelta(hours=24),
                  backup_count=0):
         """Rotating log file output, triggered by a fixed interval.
 
@@ -154,13 +140,26 @@ class TimedRotatingFile(Output):
         handler = logging.handlers.TimedRotatingFileHandler(
             logpath,
             when='S',
-            interval=_timedelta_to_seconds(interval),
+            interval=self._timedelta_to_seconds(interval),
             backupCount=backup_count)
         super(TimedRotatingFile, self).__init__(handler, formatter, level)
 
     def do_rollover(self):
         """Manually forces a log file rotation."""
         return self.handler.doRollover()
+
+    @staticmethod
+    def _timedelta_to_seconds(td):
+        """Convert a datetime.timedelta object into a seconds interval for
+        rotating file ouput.
+
+        :param td: datetime.timedelta
+        :return: time in seconds
+        :rtype: int
+        """
+        if isinstance(td, numbers.Real):
+            td = datetime.timedelta(seconds=td)
+        return td.total_seconds()
 
 
 class Stream(Output):

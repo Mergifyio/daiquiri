@@ -49,14 +49,15 @@ class TestOutput(testtools.TestCase):
                              program_name="foobar"))
 
     def test_timedelta_seconds(self):
-        fn = output._timedelta_to_seconds
+        fn = output.TimedRotatingFile._timedelta_to_seconds
         hour = 60 * 60  # seconds * minutes
 
         one_hour = [
             timedelta(hours=1),
             timedelta(minutes=60),
             timedelta(seconds=hour),
-            hour
+            hour,
+            float(hour)
         ]
         for t in one_hour:
             self.assertEqual(hour, fn(t))
@@ -69,4 +70,4 @@ class TestOutput(testtools.TestCase):
             {'dict': 'mapping'}
         ]
         for t in error_cases:
-            self.assertRaises(ValueError, fn, t)
+            self.assertRaises(AttributeError, fn, t)
