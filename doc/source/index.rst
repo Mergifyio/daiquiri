@@ -34,7 +34,7 @@ Usage
 =====
 
 The basic usage of daiquiri is to call the `daiquiri.setup` function that will
-setup logging with the options passed as keyword arguments. If no argument are
+setup logging with the options passed as keyword arguments. If no arguments are
 passed, the default will log to `stderr`. If `stderr` is a terminal, the output
 will use colors.
 
@@ -42,7 +42,7 @@ will use colors.
 
 You can specify different outputs with different formatters. The
 `daiquiri.output` module provides a collection of `Output` classes that you can
-use to your liking to configut the logging output. Any number of output can bex
+use to your liking to configure the logging output. Any number of output can be
 configured.
 
 .. literalinclude:: ../../examples/output.py
@@ -51,8 +51,8 @@ configured.
 Picking format
 --------------
 
-You can configure the format of any output by passing a formatter to as the
-`formatter` argument to the contructor. Two default formatter are available:
+You can configure the format of any output by passing a formatter as the
+`formatter` argument to the contructor. Two default formatters are available:
 `daiquiri.formatter.TEXT_FORMATTER` which prints log messages as text, and the
 `daiquiri.formatter.JSON_FORMATTER` which prints log messages as parsable JSON
 (requires `python-json-logger`).
@@ -64,7 +64,7 @@ You can provide any class of type `logging.Formatter` as a formatter.
 Python warning support
 ----------------------
 
-The Python `warnings` module is sometimes used by applications and library to
+The Python `warnings` module is sometimes used by applications and libraries to
 emit warnings. By default, they are printed on `stderr`. Daiquiri overrides
 this by default and log warnings to the `py.warnings` logger.
 
@@ -92,7 +92,7 @@ Systemd journal support
 -----------------------
 
 The `daiquiri.output.Journal` output provides systemd journal support. All the
-extra argument passed to the logger will be shipped as extra keys to the
+extra arguments passed to the logger will be shipped as extra keys to the
 journal.
 
 
