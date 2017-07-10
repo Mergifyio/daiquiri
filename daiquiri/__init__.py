@@ -79,7 +79,7 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
     :param level: Root log level.
     :param outputs: Iterable of outputs to log to.
     :param program_name: The name of the program. Auto-detected if not set.
-    :param capture_warnings: Capture warnings from the `warnings' module
+    :param capture_warnings: Capture warnings from the `warnings' module.
     """
     root_logger = logging.getLogger(None)
 
