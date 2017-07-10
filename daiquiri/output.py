@@ -9,8 +9,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import datetime
 import inspect
 import logging
+import logging.handlers
+import numbers
 import os
 import sys
 try:
@@ -41,6 +44,26 @@ class Output(object):
         logger.addHandler(self.handler)
 
 
+def _get_log_file_path(logfile=None, logdir=None, program_name=None,
+                       logfile_suffix=".log"):
+    ret_path = None
+
+    if not logdir:
+        ret_path = logfile
+
+    if not ret_path and logfile and logdir:
+        ret_path = os.path.join(logdir, logfile)
+
+    if not ret_path and logdir:
+        program_name = program_name or get_program_name()
+        ret_path = os.path.join(logdir, program_name) + logfile_suffix
+
+    if not ret_path:
+        raise ValueError("Unable to determine log file destination")
+
+    return ret_path
+
+
 class File(Output):
     def __init__(self, filename=None, directory=None, suffix=".log",
                  program_name=None, formatter=formatter.TEXT_FORMATTER,
@@ -56,24 +79,87 @@ class File(Output):
         This will be only used if no filename has been provided.
         :param program_name: Program name. Autodetected by default.
         """
-        logpath = self._get_log_file_path(filename, directory, program_name)
-        if not logpath:
-            raise ValueError("Unable to determine log file destination")
+        logpath = _get_log_file_path(filename, directory,
+                                     program_name, suffix)
         handler = logging.handlers.WatchedFileHandler(logpath)
         super(File, self).__init__(handler, formatter, level)
 
+
+class RotatingFile(Output):
+    def __init__(self, filename=None, directory=None, suffix='.log',
+                 program_name=None, formatter=formatter.TEXT_FORMATTER,
+                 level=None, max_size_bytes=0, backup_count=0):
+        """Rotating log file output.
+
+        :param filename: The log file path to write to.
+        If directory is also specified, both will be combined.
+        :param directory: The log directory to write to.
+        If no filename is specified, the program name and suffix will be used
+        to contruct the full path relative to the directory.
+        :param suffix: The log file name suffix.
+        This will be only used if no filename has been provided.
+        :param program_name: Program name. Autodetected by default.
+        :param max_size_bytes: allow the file to rollover at a
+        predetermined size.
+        :param backup_count: the maximum number of files to rotate
+        logging output between.
+        """
+        logpath = _get_log_file_path(filename, directory,
+                                     program_name, suffix)
+        handler = logging.handlers.RotatingFileHandler(
+            logpath, maxBytes=max_size_bytes, backupCount=backup_count)
+        super(RotatingFile, self).__init__(handler, formatter, level)
+
+    def do_rollover(self):
+        """Manually forces a log file rotation."""
+        return self.handler.doRollover()
+
+
+class TimedRotatingFile(Output):
+    def __init__(self, filename=None, directory=None, suffix='.log',
+                 program_name=None, formatter=formatter.TEXT_FORMATTER,
+                 level=None, interval=datetime.timedelta(hours=24),
+                 backup_count=0):
+        """Rotating log file output, triggered by a fixed interval.
+
+        :param filename: The log file path to write to.
+        If directory is also specified, both will be combined.
+        :param directory: The log directory to write to.
+        If no filename is specified, the program name and suffix will be used
+        to contruct the full path relative to the directory.
+        :param suffix: The log file name suffix.
+        This will be only used if no filename has been provided.
+        :param program_name: Program name. Autodetected by default.
+        :param interval: datetime.timedelta instance representing
+        how often a new log file should be created.
+        :param backup_count: the maximum number of files to rotate
+        logging output between.
+        """
+        logpath = _get_log_file_path(filename, directory,
+                                     program_name, suffix)
+        handler = logging.handlers.TimedRotatingFileHandler(
+            logpath,
+            when='S',
+            interval=self._timedelta_to_seconds(interval),
+            backupCount=backup_count)
+        super(TimedRotatingFile, self).__init__(handler, formatter, level)
+
+    def do_rollover(self):
+        """Manually forces a log file rotation."""
+        return self.handler.doRollover()
+
     @staticmethod
-    def _get_log_file_path(logfile=None, logdir=None, program_name=None,
-                           logfile_suffix=".log"):
-        if not logdir:
-            return logfile
+    def _timedelta_to_seconds(td):
+        """Convert a datetime.timedelta object into a seconds interval for
+        rotating file ouput.
 
-        if logfile and logdir:
-            return os.path.join(logdir, logfile)
-
-        if logdir:
-            program_name = program_name or get_program_name()
-            return os.path.join(logdir, program_name) + logfile_suffix
+        :param td: datetime.timedelta
+        :return: time in seconds
+        :rtype: int
+        """
+        if isinstance(td, numbers.Real):
+            td = datetime.timedelta(seconds=td)
+        return td.total_seconds()
 
 
 class Stream(Output):

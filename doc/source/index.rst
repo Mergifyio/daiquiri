@@ -100,3 +100,11 @@ File support
 ------------
 
 The `daiquiri.output.File` output class provides support to log into a file.
+
+`daiquiri.output.RotatingFile` class logs to a file that rotates when a
+maximum file size has been reached.
+
+`daiquiri.output.TimedRotatingFile` will rotate the log file on a fixed
+interval.
+
+.. literalinclude:: ../../examples/files.py

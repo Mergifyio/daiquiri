@@ -9,6 +9,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from datetime import timedelta
 import syslog
 
 import testtools
@@ -31,18 +32,42 @@ class TestOutput(testtools.TestCase):
 
     def test_get_log_file_path(self):
         self.assertEqual("foobar.log",
-                         output.File._get_log_file_path("foobar.log"))
+                         output._get_log_file_path("foobar.log"))
         self.assertEqual("/var/log/foo/foobar.log",
-                         output.File._get_log_file_path("foobar.log",
-                                                        logdir="/var/log/foo"))
+                         output._get_log_file_path("foobar.log",
+                                                   logdir="/var/log/foo"))
         self.assertEqual("/var/log/foobar.log",
-                         output.File._get_log_file_path(logdir="/var/log",
-                                                        program_name="foobar"))
+                         output._get_log_file_path(logdir="/var/log",
+                                                   program_name="foobar"))
         self.assertEqual("/var/log/foobar.log",
-                         output.File._get_log_file_path(logdir="/var/log",
-                                                        program_name="foobar"))
+                         output._get_log_file_path(logdir="/var/log",
+                                                   program_name="foobar"))
         self.assertEqual("/var/log/foobar.journal",
-                         output.File._get_log_file_path(
+                         output._get_log_file_path(
                              logdir="/var/log",
                              logfile_suffix=".journal",
                              program_name="foobar"))
+
+    def test_timedelta_seconds(self):
+        fn = output.TimedRotatingFile._timedelta_to_seconds
+        hour = 60 * 60  # seconds * minutes
+
+        one_hour = [
+            timedelta(hours=1),
+            timedelta(minutes=60),
+            timedelta(seconds=hour),
+            hour,
+            float(hour)
+        ]
+        for t in one_hour:
+            self.assertEqual(hour, fn(t))
+
+        error_cases = [
+            'string',
+            ['some', 'list'],
+            ('some', 'tuple',),
+            ('tuple',),
+            {'dict': 'mapping'}
+        ]
+        for t in error_cases:
+            self.assertRaises(AttributeError, fn, t)
