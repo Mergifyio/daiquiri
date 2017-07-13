@@ -47,7 +47,7 @@ configured.
 
 .. literalinclude:: ../../examples/output.py
 
-If the default output configuration suit your needs, then for convenience you
+If the default output configurations suit your needs, then for convenience you
 may pass the name of an output as a string rather than needing to import the
 class and produce an instance.
 
