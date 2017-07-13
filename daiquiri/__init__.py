@@ -89,20 +89,13 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
 
     # Add configured handlers
     for out in outputs:
-        # instantiating an output from a dict of options
-        if isinstance(out, dict):
-            klassnames = out.keys()
-            for name in klassnames:
-                klass = getattr(output, name)
-                inst = klass(**out[name])
-                inst.add_to_logger(root_logger)
 
-        # syslog is not always available, catch that early
-        elif out == 'syslog' and out not in output.preconfigured:
-            # see FIXME in output.py
+        if out == 'syslog' and output.syslog is None:
             raise RuntimeError("syslog is not available on this platform")
 
-        # `out` is a string id, for convenience
+        elif out == 'journal' and output.handlers.journal is None:
+            raise RuntimeError("Systemd bindings do not exist")
+
         elif out in output.preconfigured:
             output.preconfigured[out].add_to_logger(root_logger)
 

@@ -47,6 +47,15 @@ configured.
 
 .. literalinclude:: ../../examples/output.py
 
+If the default output configuration suit your needs, then for convenience you
+may pass the name of an output as a string rather than needing to import the
+class and produce an instance.
+
+.. literalinclude:: ../../examples/stringnames.py
+
+At the moment the names `'stderr'`, `'stdout'`, `'syslog'`, and `'journal'` are
+available, assuming the underlying handler is available.
+
 
 Picking format
 --------------
