@@ -89,19 +89,11 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
 
     # Add configured handlers
     for out in outputs:
-
-        if out == 'syslog' and output.syslog is None:
-            raise RuntimeError("syslog is not available on this platform")
-
-        elif out == 'journal' and output.handlers.journal is None:
-            raise RuntimeError("Systemd bindings do not exist")
-
-        elif out in output.preconfigured:
-            output.preconfigured[out].add_to_logger(root_logger)
-
-        # `out` is an already configured output
-        else:
-            out.add_to_logger(root_logger)
+        if isinstance(out, str):
+            out = output.preconfigured.get(out)
+            if out is None:
+                raise RuntimeError("Output {} is not available".format(out))
+        out.add_to_logger(root_logger)
 
     root_logger.setLevel(level)
 
