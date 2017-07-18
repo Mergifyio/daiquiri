@@ -67,3 +67,12 @@ class TestDaiquiri(testtools.TestCase):
     def test_parse_and_set_default_log_levels(self):
         daiquiri.parse_and_set_default_log_levels(
             ("urllib3=warn", "foobar=debug"))
+
+    def test_string_as_setup_outputs_arg(self):
+        daiquiri.setup(outputs=('stderr', 'stdout'))
+
+        if daiquiri.handlers.syslog is not None:
+            daiquiri.setup(outputs=('syslog',))
+
+        if daiquiri.handlers.journal is not None:
+            daiquiri.setup(outputs=('journal',))

@@ -88,8 +88,12 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
         root_logger.removeHandler(handler)
 
     # Add configured handlers
-    for o in outputs:
-        o.add_to_logger(root_logger)
+    for out in outputs:
+        if isinstance(out, str):
+            out = output.preconfigured.get(out)
+            if out is None:
+                raise RuntimeError("Output {} is not available".format(out))
+        out.add_to_logger(root_logger)
 
     root_logger.setLevel(level)
 

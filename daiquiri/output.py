@@ -218,3 +218,15 @@ class Syslog(Output):
                                       for fac in valid_facilities))
 
         return getattr(syslog, facility)
+
+
+preconfigured = {
+    'stderr': STDERR,
+    'stdout': STDOUT,
+}
+
+if syslog is not None:
+    preconfigured['syslog'] = Syslog()
+
+if handlers.journal is not None:
+    preconfigured['journal'] = Journal()
