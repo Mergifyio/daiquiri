@@ -62,7 +62,7 @@ class JournalHandler(logging.Handler):
     def __init__(self, program_name):
         if not journal:
             raise RuntimeError("Systemd bindings do not exist")
-        super(SyslogHandler, self).__init__()
+        super(JournalHandler, self).__init__()
         self.program_name = program_name
 
     def emit(self, record):
