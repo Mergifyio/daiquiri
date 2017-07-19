@@ -26,10 +26,10 @@ DEFAULT_FORMAT = (
 class ColorFormatter(logging.Formatter):
     # TODO(jd) Allow configuration
     LEVEL_COLORS = {
-        logging.DEBUG: '\033[00;32m',  # GREEN
+        logging.DEBUG: '\033[00;37m',  # GRAY
         logging.INFO: '\033[00;36m',  # CYAN
-        logging.WARN: '\033[01;33m',  # BOLD YELLOW
-        logging.ERROR: '\033[01;31m',  # BOLD RED
+        logging.WARN: '\033[00;33m',  # YELLOW
+        logging.ERROR: '\033[00;31m',  # RED
         logging.CRITICAL: '\033[01;31m',  # BOLD RED
     }
 
