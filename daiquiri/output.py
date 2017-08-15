@@ -65,6 +65,8 @@ def _get_log_file_path(logfile=None, logdir=None, program_name=None,
 
 
 class File(Output):
+    """Ouput to a file."""
+
     def __init__(self, filename=None, directory=None, suffix=".log",
                  program_name=None, formatter=formatter.TEXT_FORMATTER,
                  level=None):
@@ -86,6 +88,8 @@ class File(Output):
 
 
 class RotatingFile(Output):
+    """Output to a file, rotating after a certain size."""
+
     def __init__(self, filename=None, directory=None, suffix='.log',
                  program_name=None, formatter=formatter.TEXT_FORMATTER,
                  level=None, max_size_bytes=0, backup_count=0):
@@ -116,6 +120,8 @@ class RotatingFile(Output):
 
 
 class TimedRotatingFile(Output):
+    """Rotating log file output, triggered by a fixed interval."""
+
     def __init__(self, filename=None, directory=None, suffix='.log',
                  program_name=None, formatter=formatter.TEXT_FORMATTER,
                  level=None, interval=datetime.timedelta(hours=24),
@@ -163,6 +169,8 @@ class TimedRotatingFile(Output):
 
 
 class Stream(Output):
+    """Generic stream output."""
+
     def __init__(self, stream=sys.stderr, formatter=formatter.TEXT_FORMATTER,
                  level=None):
         super(Stream, self).__init__(handlers.TTYDetectorStreamHandler(stream),
