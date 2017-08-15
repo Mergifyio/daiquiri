@@ -58,6 +58,7 @@ class SyslogHandler(logging.Handler):
 
 
 class JournalHandler(logging.Handler):
+    """Journald based handler. Only available on platforms using systemd."""
 
     def __init__(self, program_name):
         if not journal:
