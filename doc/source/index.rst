@@ -117,3 +117,23 @@ maximum file size has been reached.
 interval.
 
 .. literalinclude:: ../../examples/files.py
+
+API
+===
+.. automodule:: daiquiri
+   :members:
+
+Output
+------
+.. automodule:: daiquiri.output
+   :members:
+
+Handlers
+--------
+.. automodule:: daiquiri.handlers
+   :members:
+
+Formatter
+---------
+.. automodule:: daiquiri.formatter
+   :members:
