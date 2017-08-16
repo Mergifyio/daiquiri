@@ -8,3 +8,11 @@ before_install:
 install:
   - pip install tox-travis .[test]
 script: tox
+deploy:
+  provider: pypi
+  user: jd
+  password:
+    secure: kyeXaQ+0Yv1GC2vWC8zghXDLtYEtZ8SbTuw90hA4VQm2HlPUyVDKL8zi4YyEuziRd7mG/7XrgpZG6fNh02wEblFngrmWAJ9dze/9JRLjyCFCNn6oM9xRqNOC19ZWiV5/ifgLp7Ije3lfrsRI5OsDaXy9Dd2cNO/1O/MOMwpqpzs5fUZYcY4HQj0tJmSmM72RaR2C9hn/BGJEZWPyx6XMboQLnkLvlCT6hZHpk+y3Ofg+5wUd4IaZe8ZH/rkPQu5nBclGpUkQ99jb5YhwwQno52TgVeh3xf8Vzy5riYQD6No5JvYHs9MGkBfctdTcOwMRwH8XDxhIDDj1o3MeCgKCsfmskRxvBmk5nJzv3Lk8pdlEt/TUiuorU6+Zo2UMeGhSFPY6JBrK1ELs/XiZHbB63vJ+VLSoEluXzBTFyw7wAg7MRsNOneHvXCpjSVS4SxqmzrIRZBNvNpkkE/ZainlGG3KII9JM4tG6oJ2XvELMtG9A+2z450HnFJFV06F+qnztl31+VagMOW0BMnyVtR+dayAHAZ1qHaTrPf0mRJIKKp8QpF37//wWkrSaAyZAf5CeTtVYM2saxEcQzJX9wtp0KKfxnlg0xSBc7BRDJBSFexUeWMX1o1q1qU8c26sZU29XBjuxKRzC/jnZWAhWdL9YEGyISUrbsHHdwRGDKOzyBjc=
+  on:
+    tags: true
+  distributions: "sdist bdist_wheel"
