@@ -51,21 +51,66 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
         return msg, kwargs
 
 
+PARAMETER_TEMPLATE = ' [{0}: {1}]'
+
+
+class ArbitraryContextAdapter(logging.LoggerAdapter):
+    """Logger adapter to add context string to log record's extra data
+
+    Keywords passed to the log call are formatted into a context
+    string, which is then added to the "extra" dictionary passed to
+    the underlying logger so they are emitted with the log message and
+    available to the format string.
+
+    Example:
+      A formatter with the format string of "%(context)s %(messages)"
+      called like logger.info("A message.", test1="a", test2="b")
+      would log the message: " [test1: a] [test2: b] A message."
+
+    Special keywords:
+
+    extra
+      An existing dictionary of extra values to be passed to the
+      logger. If present, the dictionary is copied and extended.
+    """
+
+    def process(self, msg, kwargs):
+        # Make a new extra dictionary combining the values we were
+        # given when we were constructed and a 'context' key which
+        # will contain a formatted string containing anything from
+        # kwargs.
+        extra = self.extra.copy()
+        if 'extra' in kwargs:
+            extra.update(kwargs.pop('extra'))
+        # Format any unknown keyword arguments into the context string.
+        context = ''
+        for name in list(kwargs.keys()):
+            if name == 'exc_info':
+                continue
+            context += PARAMETER_TEMPLATE.format(name, kwargs.pop(name))
+        extra['context'] = context
+        extra['_daiquiri_extra'] = extra
+        kwargs['extra'] = extra
+        return msg, kwargs
+
+
 _LOGGERS = weakref.WeakValueDictionary()
 
 
-def getLogger(name=None, **kwargs):
+def getLogger(name=None, adapter_class=KeywordArgumentAdapter, **kwargs):
     """Build a logger with the given name.
 
     :param name: The name for the logger. This is usually the module
                  name, ``__name__``.
     :type name: string
+    :param adapter_class: The class to instantiate the logger's adapter with.
+    :type adapter_class: type
     """
     adapter = _LOGGERS.get(name)
     if not adapter:
         # NOTE(jd) Keep using the `adapter' variable here because so it's not
         # collected by Python since _LOGGERS contains only a weakref
-        adapter = KeywordArgumentAdapter(logging.getLogger(name), kwargs)
+        adapter = adapter_class(logging.getLogger(name), kwargs)
         _LOGGERS[name] = adapter
     return adapter
 
