@@ -71,6 +71,7 @@ class ExtrasFormatter(logging.Formatter):
 
     def add_extras(self, record):
         if self.keywords is None or not hasattr(record, '_daiquiri_extra'):
+            record.extras = ''
             return
 
         # Format any unknown keyword arguments into the extras string.
@@ -95,10 +96,10 @@ class ExtrasFormatter(logging.Formatter):
         return s
 
 
-class ColorExtrasFormatter(ExtrasFormatter, ColorFormatter):
+class ColorExtrasFormatter(ColorFormatter, ExtrasFormatter):
     def format(self, record):
         self.add_color(record)
-        s = super(ColorExtrasFormatter, self).format(record)
+        s = ExtrasFormatter.format(self, record)
         self.remove_color(record)
         return s
 

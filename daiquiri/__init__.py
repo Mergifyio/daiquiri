@@ -54,20 +54,18 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
 _LOGGERS = weakref.WeakValueDictionary()
 
 
-def getLogger(name=None, adapter_class=KeywordArgumentAdapter, **kwargs):
+def getLogger(name=None, **kwargs):
     """Build a logger with the given name.
 
     :param name: The name for the logger. This is usually the module
                  name, ``__name__``.
     :type name: string
-    :param adapter_class: The class to instantiate the logger's adapter with.
-    :type adapter_class: type
     """
     adapter = _LOGGERS.get(name)
     if not adapter:
         # NOTE(jd) Keep using the `adapter' variable here because so it's not
         # collected by Python since _LOGGERS contains only a weakref
-        adapter = adapter_class(logging.getLogger(name), kwargs)
+        adapter = KeywordArgumentAdapter(logging.getLogger(name), kwargs)
         _LOGGERS[name] = adapter
     return adapter
 
