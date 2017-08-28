@@ -58,49 +58,6 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
             self.logger.setLevel(level)
 
 
-PARAMETER_TEMPLATE = ' [{0}: {1}]'
-
-
-class ArbitraryContextAdapter(logging.LoggerAdapter):
-    """Logger adapter to add context string to log record's extra data
-
-    Keywords passed to the log call are formatted into a context
-    string, which is then added to the "extra" dictionary passed to
-    the underlying logger so they are emitted with the log message and
-    available to the format string.
-
-    Example:
-      A formatter with the format string of "%(context)s %(messages)"
-      called like logger.info("A message.", test1="a", test2="b")
-      would log the message: " [test1: a] [test2: b] A message."
-
-    Special keywords:
-
-    extra
-      An existing dictionary of extra values to be passed to the
-      logger. If present, the dictionary is copied and extended.
-    """
-
-    def process(self, msg, kwargs):
-        # Make a new extra dictionary combining the values we were
-        # given when we were constructed and a 'context' key which
-        # will contain a formatted string containing anything from
-        # kwargs.
-        extra = self.extra.copy()
-        if 'extra' in kwargs:
-            extra.update(kwargs.pop('extra'))
-        # Format any unknown keyword arguments into the context string.
-        context = ''
-        for name in list(kwargs.keys()):
-            if name == 'exc_info':
-                continue
-            context += PARAMETER_TEMPLATE.format(name, kwargs.pop(name))
-        extra['context'] = context
-        extra['_daiquiri_extra'] = extra
-        kwargs['extra'] = extra
-        return msg, kwargs
-
-
 _LOGGERS = weakref.WeakValueDictionary()
 
 
