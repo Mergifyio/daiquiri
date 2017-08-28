@@ -24,6 +24,8 @@ DEFAULT_FORMAT = (
 
 
 class ColorFormatter(logging.Formatter):
+    """Colorizes log output"""
+
     # TODO(jd) Allow configuration
     LEVEL_COLORS = {
         logging.DEBUG: '\033[00;32m',  # GREEN
@@ -55,6 +57,34 @@ class ColorFormatter(logging.Formatter):
 
 
 class ExtrasFormatter(logging.Formatter):
+    """Formats extra keywords into %(extras)s placeholder.
+
+    Any keywords passed to a logging call will be formatted into a
+    "extras" string and included in a logging message.
+    Example:
+        logger.info('my message', extra='keyword')
+    will cause an "extras" string of:
+        [extra: keyword]
+    to be inserted into the format in place of %(extras)s.
+
+    The optional `keywords` argument must be passed into the init
+    function to enable this functionality. Without it normal daiquri
+    formatting will be applied. Any keywords included in the
+    `keywords` parameter will not be included in the "extras" string.
+
+    Special keywords:
+
+    keywords
+      A list of strings containing keywords to filter out of the
+      "extras" string.
+
+    extras_template
+      A format string to use instead of '[{0}: {1}]'
+
+    extras_separator
+      What character to "join" multiple "extras" with.
+    """
+
     def __init__(self,
                  fmt=None,
                  datefmt=None,
@@ -63,8 +93,8 @@ class ExtrasFormatter(logging.Formatter):
                  extras_template='[{0}: {1}]',
                  extras_separator=' '):
         self.keywords = keywords
-        self.extras_separator = extras_separator
         self.extras_template = extras_template
+        self.extras_separator = extras_separator
         super(ExtrasFormatter, self).__init__(fmt=fmt,
                                               datefmt=datefmt,
                                               style=style)
@@ -97,6 +127,8 @@ class ExtrasFormatter(logging.Formatter):
 
 
 class ColorExtrasFormatter(ColorFormatter, ExtrasFormatter):
+    """Combines functionality of ColorFormatter and ExtrasFormatter."""
+
     def format(self, record):
         self.add_color(record)
         s = ExtrasFormatter.format(self, record)
