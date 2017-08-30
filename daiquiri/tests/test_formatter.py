@@ -4,7 +4,7 @@ import six
 import daiquiri
 
 
-class TestExtrasFormatter(testtools.TestCase):
+class TestColorExtrasFormatter(testtools.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.logger = daiquiri.getLogger('my_module')
@@ -12,7 +12,7 @@ class TestExtrasFormatter(testtools.TestCase):
         cls.stream = six.moves.StringIO()
         cls.handler = daiquiri.handlers.TTYDetectorStreamHandler(cls.stream)
         cls.logger.logger.addHandler(cls.handler)
-        super(TestExtrasFormatter, cls).setUpClass()
+        super(TestColorExtrasFormatter, cls).setUpClass()
 
     def setUp(self):
         # Couldn't get readline() to return anything no matter what I tried, so
@@ -21,11 +21,11 @@ class TestExtrasFormatter(testtools.TestCase):
         self.stream.close()
         self.stream = six.moves.StringIO()
         self.handler.stream = self.stream
-        super(TestExtrasFormatter, self).setUp()
+        super(TestColorExtrasFormatter, self).setUp()
 
     def test_no_keywords(self):
         format_string = '%(levelname)s %(name)s%(extras)s: %(message)s'
-        formatter = daiquiri.formatter.ExtrasFormatter(fmt=format_string)
+        formatter = daiquiri.formatter.ColorExtrasFormatter(fmt=format_string)
         self.handler.setFormatter(formatter)
 
         self.logger.info('test message')
@@ -34,7 +34,7 @@ class TestExtrasFormatter(testtools.TestCase):
 
     def test_no_keywords_with_extras(self):
         format_string = '%(levelname)s %(name)s%(extras)s: %(message)s'
-        formatter = daiquiri.formatter.ExtrasFormatter(fmt=format_string)
+        formatter = daiquiri.formatter.ColorExtrasFormatter(fmt=format_string)
         self.handler.setFormatter(formatter)
 
         # The formatter.keywords is None, so "extras" functionality
@@ -46,8 +46,8 @@ class TestExtrasFormatter(testtools.TestCase):
 
     def test_empty_keywords(self):
         format_string = '%(levelname)s %(name)s%(extras)s: %(message)s'
-        formatter = daiquiri.formatter.ExtrasFormatter(fmt=format_string,
-                                                       keywords=[])
+        formatter = daiquiri.formatter.ColorExtrasFormatter(fmt=format_string,
+                                                            keywords=[])
         self.handler.setFormatter(formatter)
 
         self.logger.info('test message', test="a")
@@ -57,8 +57,8 @@ class TestExtrasFormatter(testtools.TestCase):
     def test_keywords_no_extras(self):
         format_string = ('%(levelname)s %(name)s'
                          ' %(test)s%(extras)s: %(message)s')
-        formatter = daiquiri.formatter.ExtrasFormatter(fmt=format_string,
-                                                       keywords=["test"])
+        formatter = daiquiri.formatter.ColorExtrasFormatter(fmt=format_string,
+                                                            keywords=["test"])
         self.handler.setFormatter(formatter)
 
         self.logger.info('test message', test="a")
@@ -68,8 +68,8 @@ class TestExtrasFormatter(testtools.TestCase):
     def test_keywords_with_extras(self):
         format_string = ('%(levelname)s %(name)s'
                          ' %(test)s%(extras)s: %(message)s')
-        formatter = daiquiri.formatter.ExtrasFormatter(fmt=format_string,
-                                                       keywords=["test"])
+        formatter = daiquiri.formatter.ColorExtrasFormatter(fmt=format_string,
+                                                            keywords=["test"])
         self.handler.setFormatter(formatter)
 
         self.logger.info('test message', test="a", test2="b")
