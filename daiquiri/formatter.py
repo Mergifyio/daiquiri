@@ -19,7 +19,7 @@ except ImportError:
 
 DEFAULT_FORMAT = (
     "%(asctime)s [%(process)d] %(color)s%(levelname)-8.8s "
-    "%(name)s %(extras)s: %(message)s%(color_stop)s"
+    "%(name)s%(extras)s: %(message)s%(color_stop)s"
 )
 
 
@@ -68,7 +68,7 @@ class ExtrasFormatter(logging.Formatter):
     to be inserted into the format in place of %(extras)s.
 
     The optional `keywords` argument must be passed into the init
-    function to enable this functionality. Without it normal daiquri
+    function to enable this functionality. Without it normal daiquiri
     formatting will be applied. Any keywords included in the
     `keywords` parameter will not be included in the "extras" string.
 
@@ -82,7 +82,12 @@ class ExtrasFormatter(logging.Formatter):
       A format string to use instead of '[{0}: {1}]'
 
     extras_separator
-      What character to "join" multiple "extras" with.
+      What string to "join" multiple "extras" with.
+
+    extras_prefix and extras_suffix
+      Strings which will be prepended and appended to the "extras"
+      string respectively. These will only be prepended if the
+      "extras" string is not empty.
     """
 
     def __init__(self,
@@ -91,10 +96,14 @@ class ExtrasFormatter(logging.Formatter):
                  style='%',
                  keywords=None,
                  extras_template='[{0}: {1}]',
-                 extras_separator=' '):
+                 extras_separator=' ',
+                 extras_prefix=' ',
+                 extras_suffix=''):
         self.keywords = keywords
         self.extras_template = extras_template
         self.extras_separator = extras_separator
+        self.extras_prefix = extras_prefix
+        self.extras_suffix = extras_suffix
         super(ExtrasFormatter, self).__init__(fmt=fmt,
                                               datefmt=datefmt,
                                               style=style)
@@ -104,17 +113,14 @@ class ExtrasFormatter(logging.Formatter):
             record.extras = ''
             return
 
-        # Format any unknown keyword arguments into the extras string.
-        extras_string = ''
-        separator = ''
-        for k, v in record._daiquiri_extra.items():
-            if k != '_daiquiri_extra' and k not in self.keywords:
-                extras_string += separator + self.extras_template.format(k, v)
-                # Only set this after the first iteration to prevent a
-                # leading space
-                separator = self.extras_separator
-
-        record.extras = extras_string
+        extras = self.extras_separator.join(
+            self.extras_template.format(k, v)
+            for k, v in record._daiquiri_extra.items()
+            if k != '_daiquiri_extra' and k not in self.keywords
+        )
+        if extras != '':
+            extras = self.extras_prefix + extras + self.extras_suffix
+        record.extras = extras
 
     def remove_extras(self, record):
         del record.extras
