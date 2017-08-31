@@ -1,6 +1,7 @@
+import logging
+
 import daiquiri
 import daiquiri.formatter
-import logging
 
 daiquiri.setup(level=logging.INFO, outputs=(
     daiquiri.output.Stream(formatter=daiquiri.formatter.ColorFormatter(

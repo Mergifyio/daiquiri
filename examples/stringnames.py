@@ -1,5 +1,6 @@
-import daiquiri
 import logging
+
+import daiquiri
 
 daiquiri.setup(level=logging.INFO, outputs=('stdout', 'stderr'))
 

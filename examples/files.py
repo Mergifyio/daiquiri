@@ -1,6 +1,7 @@
-import daiquiri
 import datetime
 import logging
+
+import daiquiri
 
 daiquiri.setup(
     level=logging.DEBUG,
