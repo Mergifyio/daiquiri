@@ -19,6 +19,11 @@ except ImportError:
 
 DEFAULT_FORMAT = (
     "%(asctime)s [%(process)d] %(color)s%(levelname)-8.8s "
+    "%(name)s: %(message)s%(color_stop)s"
+)
+
+DEFAULT_EXTRAS_FORMAT = (
+    "%(asctime)s [%(process)d] %(color)s%(levelname)-8.8s "
     "%(name)s%(extras)s: %(message)s%(color_stop)s"
 )
 
@@ -91,22 +96,18 @@ class ExtrasFormatter(logging.Formatter):
     """
 
     def __init__(self,
-                 fmt=None,
-                 datefmt=None,
-                 style='%',
                  keywords=None,
                  extras_template='[{0}: {1}]',
                  extras_separator=' ',
                  extras_prefix=' ',
-                 extras_suffix=''):
+                 extras_suffix='',
+                 *args, **kwargs):
         self.keywords = keywords
         self.extras_template = extras_template
         self.extras_separator = extras_separator
         self.extras_prefix = extras_prefix
         self.extras_suffix = extras_suffix
-        super(ExtrasFormatter, self).__init__(fmt=fmt,
-                                              datefmt=datefmt,
-                                              style=style)
+        super(ExtrasFormatter, self).__init__(*args, **kwargs)
 
     def add_extras(self, record):
         if self.keywords is None or not hasattr(record, '_daiquiri_extra'):
@@ -142,6 +143,6 @@ class ColorExtrasFormatter(ColorFormatter, ExtrasFormatter):
         return s
 
 
-TEXT_FORMATTER = ColorExtrasFormatter(fmt=DEFAULT_FORMAT)
+TEXT_FORMATTER = ColorExtrasFormatter(fmt=DEFAULT_EXTRAS_FORMAT)
 if jsonlogger:
     JSON_FORMATTER = jsonlogger.JsonFormatter()
