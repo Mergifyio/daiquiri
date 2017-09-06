@@ -40,6 +40,10 @@ class TestDaiquiri(testtools.TestCase):
         self.assertEqual({"message": "foobar"},
                          json.loads(stream.getvalue()))
 
+    def test_get_logger_set_level(self):
+        logger = daiquiri.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+
     def test_capture_warnings(self):
         stream = six.moves.StringIO()
         daiquiri.setup(outputs=(
@@ -48,7 +52,7 @@ class TestDaiquiri(testtools.TestCase):
         warnings.warn("omg!")
         line = stream.getvalue()
         self.assertIn("WARNING  py.warnings: ", line)
-        self.assertIn("daiquiri/tests/test_daiquiri.py:48: "
+        self.assertIn("daiquiri/tests/test_daiquiri.py:52: "
                       "UserWarning: omg!\n  warnings.warn(\"omg!\")\n",
                       line)
 

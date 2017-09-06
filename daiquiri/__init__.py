@@ -50,6 +50,13 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
         kwargs['extra'] = extra
         return msg, kwargs
 
+    if sys.version_info.major == 2:
+        def setLevel(self, level):
+            """
+            Set the specified level on the underlying logger.
+            """
+            self.logger.setLevel(level)
+
 
 _LOGGERS = weakref.WeakValueDictionary()
 
