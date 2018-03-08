@@ -10,14 +10,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import syslog
+import unittest
 from datetime import timedelta
-
-import testtools
 
 from daiquiri import output
 
 
-class TestOutput(testtools.TestCase):
+class TestOutput(unittest.TestCase):
     def test_find_facility(self):
         self.assertEqual(syslog.LOG_USER,
                          output.Syslog._find_facility("user"))

@@ -11,15 +11,15 @@
 #    under the License.
 import json
 import logging
+import unittest
 import warnings
 
 import six.moves
-import testtools
 
 import daiquiri
 
 
-class TestDaiquiri(testtools.TestCase):
+class TestDaiquiri(unittest.TestCase):
     def tearDown(self):
         # Be sure to reset the warning capture
         logging.captureWarnings(False)
