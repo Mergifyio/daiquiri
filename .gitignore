@@ -4,7 +4,6 @@
 *.egg-info
 dist
 .tox
-.testrepository
 # pbr generates these
 AUTHORS
 ChangeLog

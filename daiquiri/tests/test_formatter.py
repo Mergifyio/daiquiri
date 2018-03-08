@@ -10,14 +10,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import logging
+import unittest
 
 import six
-import testtools
 
 import daiquiri
 
 
-class TestColorExtrasFormatter(testtools.TestCase):
+class TestColorExtrasFormatter(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.logger = daiquiri.getLogger('my_module')
