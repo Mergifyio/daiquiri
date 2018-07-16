@@ -88,10 +88,10 @@ class JournalHandler(logging.Handler):
         if record.exc_info:
             extras['EXCEPTION_INFO'] = record.exc_info
 
-        if hasattr(record, "_daiquiri_extra"):
-            for k, v in record._daiquiri_extra.items():
-                if k != "_daiquiri_extra":
-                    extras[k.upper()] = v
+        if hasattr(record, "_daiquiri_extra_keys"):
+            for k, v in record._daiquiri_extra_keys:
+                if k != "_daiquiri_extra_keys":
+                    extras[k.upper()] = getattr(record, k)
 
         journal.send(message, **extras)
 

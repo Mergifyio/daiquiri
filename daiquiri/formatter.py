@@ -110,14 +110,15 @@ class ExtrasFormatter(logging.Formatter):
         super(ExtrasFormatter, self).__init__(*args, **kwargs)
 
     def add_extras(self, record):
-        if self.keywords is None or not hasattr(record, '_daiquiri_extra'):
+        if self.keywords is None or not hasattr(record,
+                                                '_daiquiri_extra_keys'):
             record.extras = ''
             return
 
         extras = self.extras_separator.join(
-            self.extras_template.format(k, v)
-            for k, v in record._daiquiri_extra.items()
-            if k != '_daiquiri_extra' and k not in self.keywords
+            self.extras_template.format(k, getattr(record, k))
+            for k in record._daiquiri_extra_keys
+            if k != '_daiquiri_extra_keys' and k not in self.keywords
         )
         if extras != '':
             extras = self.extras_prefix + extras + self.extras_suffix
