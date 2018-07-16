@@ -46,7 +46,7 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
             if name == 'exc_info':
                 continue
             extra[name] = kwargs.pop(name)
-        extra['_daiquiri_extra'] = extra
+        extra['_daiquiri_extra_keys'] = set(extra.keys())
         kwargs['extra'] = extra
         return msg, kwargs
 
