@@ -50,12 +50,9 @@ class TestColorExtrasFormatter(unittest.TestCase):
         formatter = daiquiri.formatter.ColorExtrasFormatter(fmt=format_string)
         self.handler.setFormatter(formatter)
 
-        # The formatter.keywords is None, so "extras" functionality
-        # won't be turned on even though addtional keyword arguments
-        # are being passed into the log method.
         self.logger.info('test message', test="a")
         self.assertEqual(self.stream.getvalue(),
-                         'INFO my_module: test message\n')
+                         'INFO my_module [test: a]: test message\n')
 
     def test_empty_keywords(self):
         format_string = '%(levelname)s %(name)s%(extras)s: %(message)s'

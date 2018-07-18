@@ -80,7 +80,7 @@ class ExtrasFormatter(logging.Formatter):
     Special keywords:
 
     keywords
-      A list of strings containing keywords to filter out of the
+      A set of strings containing keywords to filter out of the
       "extras" string.
 
     extras_template
@@ -102,7 +102,7 @@ class ExtrasFormatter(logging.Formatter):
                  extras_prefix=' ',
                  extras_suffix='',
                  *args, **kwargs):
-        self.keywords = keywords
+        self.keywords = set() if keywords is None else keywords
         self.extras_template = extras_template
         self.extras_separator = extras_separator
         self.extras_prefix = extras_prefix
@@ -110,8 +110,7 @@ class ExtrasFormatter(logging.Formatter):
         super(ExtrasFormatter, self).__init__(*args, **kwargs)
 
     def add_extras(self, record):
-        if self.keywords is None or not hasattr(record,
-                                                '_daiquiri_extra_keys'):
+        if not hasattr(record, '_daiquiri_extra_keys'):
             record.extras = ''
             return
 
