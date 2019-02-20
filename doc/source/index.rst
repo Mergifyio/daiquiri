@@ -90,6 +90,18 @@ logging method and that will be available as part of the record.
 
 .. literalinclude:: ../../examples/extra.py
 
+Advanced Extra usage
+-----------
+
+The enhanced logger object provided by `daiquiri.getLogger` is also capable of
+supporting keyword arguments to the logging method without the logger itself
+having been configured to expect those specific keywords. This requires the
+use of the ExtrasFormatter or the ColorExtrasFormatter classes. The
+documentation for the ExtrasFormatter specifies the various options you can
+configure on it.
+
+.. literalinclude:: ../../examples/advanced_extra.py
+
 
 Syslog support
 --------------
