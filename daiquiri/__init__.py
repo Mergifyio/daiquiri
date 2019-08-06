@@ -14,7 +14,6 @@ import logging.config
 import logging.handlers
 import sys
 import traceback
-import weakref
 
 from daiquiri import output
 
@@ -58,9 +57,6 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
             self.logger.setLevel(level)
 
 
-_LOGGERS = weakref.WeakValueDictionary()
-
-
 def getLogger(name=None, **kwargs):
     """Build a logger with the given name.
 
@@ -68,13 +64,7 @@ def getLogger(name=None, **kwargs):
                  name, ``__name__``.
     :type name: string
     """
-    adapter = _LOGGERS.get(name)
-    if not adapter:
-        # NOTE(jd) Keep using the `adapter' variable here because so it's not
-        # collected by Python since _LOGGERS contains only a weakref
-        adapter = KeywordArgumentAdapter(logging.getLogger(name), kwargs)
-        _LOGGERS[name] = adapter
-    return adapter
+    return KeywordArgumentAdapter(logging.getLogger(name), kwargs)
 
 
 def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,

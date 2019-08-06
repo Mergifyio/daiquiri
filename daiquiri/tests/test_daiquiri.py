@@ -90,3 +90,17 @@ class TestDaiquiri(unittest.TestCase):
 
         if daiquiri.handlers.journal is not None:
             daiquiri.setup(outputs=('journal',))
+
+
+def test_extra_with_two_loggers():
+    stream = six.moves.StringIO()
+    daiquiri.setup(outputs=(
+        daiquiri.output.Stream(stream),
+    ))
+    log1 = daiquiri.getLogger("foobar")
+    log1.error("argh")
+    log2 = daiquiri.getLogger("foobar", key="value")
+    log2.warning("boo")
+    lines = stream.getvalue().strip().split("\n")
+    assert lines[0].endswith("ERROR    foobar: argh")
+    assert lines[1].endswith("WARNING  foobar [key: value]: boo")
