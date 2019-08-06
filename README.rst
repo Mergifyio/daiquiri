@@ -2,9 +2,8 @@
 daiquiri -- Python logging setup helper
 =======================================
 
-.. image:: https://travis-ci.org/jd/daiquiri.png?branch=master
-    :target: https://travis-ci.org/jd/daiquiri
-    :alt: Build Status
+.. image:: https://circleci.com/gh/jd/daiquiri.svg?style=svg
+   :target: https://circleci.com/gh/jd/daiquiri
 
 .. image:: https://img.shields.io/pypi/v/daiquiri.svg
     :target: https://pypi.python.org/pypi/daiquiri
