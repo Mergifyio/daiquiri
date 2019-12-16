@@ -101,7 +101,11 @@ class TTYDetectorStreamHandler(logging.StreamHandler):
 
     def format(self, record):
         if hasattr(self.stream, "isatty"):
-            record._stream_is_a_tty = self.stream.isatty()
+            try:
+                record._stream_is_a_tty = self.stream.isatty()
+            except ValueError:
+                # Stream has been closed, usually during interpretor shutdown
+                record._stream_is_a_tty = False
         else:
             record._stream_is_a_tty = False
         s = super(TTYDetectorStreamHandler, self).format(record)
