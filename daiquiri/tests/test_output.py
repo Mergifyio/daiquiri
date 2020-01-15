@@ -9,11 +9,29 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import json
+import logging
 import syslog
 import unittest
 from datetime import timedelta
 
+import mock
+
+import daiquiri
 from daiquiri import output
+
+
+class DatadogMatcher(object):
+    def __init__(self, expected):
+        self.expected = expected
+
+    def __eq__(self, other):
+        return json.loads(other.decode()[:-1]) == self.expected
+
+    def __repr__(self):
+        return "b'" + json.dumps(
+            self.expected, default=lambda x: "unserializable"
+        ) + "\\n'"
 
 
 class TestOutput(unittest.TestCase):
@@ -70,3 +88,36 @@ class TestOutput(unittest.TestCase):
         ]
         for t in error_cases:
             self.assertRaises(AttributeError, fn, t)
+
+    def test_datadog(self):
+        with mock.patch('socket.socket') as mock_socket:
+            socket_instance = mock_socket.return_value
+            daiquiri.setup(outputs=(daiquiri.output.Datadog(),),
+                           level=logging.DEBUG)
+            logger = daiquiri.getLogger()
+            logger.error("foo", bar=1)
+            logger.info("bar")
+            try:
+                1 / 0
+            except ZeroDivisionError:
+                logger = daiquiri.getLogger("saymyname")
+                logger.error("backtrace", exc_info=True)
+            socket_instance.connect.assert_called_once_with(
+                ("127.0.0.1", 10518)
+            )
+            socket_instance.sendall.assert_has_calls([
+                mock.call(DatadogMatcher({
+                    "status": "error", "message": "foo", "bar": 1,
+                    "logger": {"name": "root"}, "timestamp": mock.ANY,
+                })),
+                mock.call(DatadogMatcher({
+                    "status": "info", "message": "bar",
+                    "logger": {"name": "root"}, "timestamp": mock.ANY,
+                })),
+                mock.call(DatadogMatcher({
+                    "status": "error", "message": "backtrace",
+                    "logger": {"name": "saymyname"}, "timestamp": mock.ANY,
+                    "error": {"kind": "ZeroDivisionError", "stack": None,
+                              "message": mock.ANY}
+                })),
+            ])
