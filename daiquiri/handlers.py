@@ -111,3 +111,14 @@ class TTYDetectorStreamHandler(logging.StreamHandler):
         s = super(TTYDetectorStreamHandler, self).format(record)
         del record._stream_is_a_tty
         return s
+
+
+class PlainTextSocketHandler(logging.handlers.SocketHandler):
+    """Socket handler that uses format and encode the record."""
+
+    def __init__(self, hostname, port, encoding="utf-8"):
+        self.encoding = encoding
+        super(PlainTextSocketHandler, self).__init__(hostname, port)
+
+    def makePickle(self, record):
+        return self.format(record).encode(self.encoding) + b"\n"

@@ -20,11 +20,6 @@ Installation
 
   pip install daiquiri
 
-If you want to enable support of JSON output, you must also install the `json`
-flavor::
-
-  pip install daiquiri[json]
-
 If you want to enable systemd support, you must install the `systemd` flavor::
 
   pip install daiquiri[systemd]
