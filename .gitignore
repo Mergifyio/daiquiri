@@ -4,8 +4,5 @@
 *.egg-info
 dist
 .tox
-# pbr generates these
-AUTHORS
-ChangeLog
 doc/build
 build
