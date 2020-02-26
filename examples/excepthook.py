@@ -3,4 +3,5 @@ import daiquiri
 daiquiri.setup(set_excepthook=False)
 logger = daiquiri.getLogger(__name__)
 
-raise Exception("Something went wrong") # This exception will not pass through Daiquiri
+# This exception will not pass through Daiquiri:
+raise Exception("Something went wrong")
