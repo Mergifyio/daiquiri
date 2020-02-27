@@ -68,7 +68,7 @@ def getLogger(name=None, **kwargs):
 
 
 def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
-          capture_warnings=True):
+          capture_warnings=True, set_excepthook=True):
     """Setup Python logging.
 
     This will setup basic handlers for Python logging.
@@ -94,13 +94,14 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
 
     root_logger.setLevel(level)
 
-    program_logger = logging.getLogger(program_name)
+    if set_excepthook:
+        program_logger = logging.getLogger(program_name)
 
-    def logging_excepthook(exc_type, value, tb):
-        program_logger.critical(
-            "".join(traceback.format_exception(exc_type, value, tb)))
+        def logging_excepthook(exc_type, value, tb):
+            program_logger.critical(
+                "".join(traceback.format_exception(exc_type, value, tb)))
 
-    sys.excepthook = logging_excepthook
+        sys.excepthook = logging_excepthook
 
     if capture_warnings:
         logging.captureWarnings(True)

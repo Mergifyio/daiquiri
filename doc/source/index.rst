@@ -124,6 +124,18 @@ interval.
 
 .. literalinclude:: ../../examples/files.py
 
+
+Excepthook Integration
+----------------------
+
+The `daiquiri.setup` method accepts an optional `set_excepthook` keyword argument
+(defaults to `True`) which controls whether or not Daiquiri will override the
+global `sys.excepthook`. Disabling this can be useful when using Daiquiri alongside
+another library which requires setting the excepthook, e.g. an error reporting
+library.
+
+.. literalinclude:: ../../examples/excepthook.py
+
 API
 ===
 .. automodule:: daiquiri
