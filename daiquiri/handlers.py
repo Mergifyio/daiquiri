@@ -89,7 +89,7 @@ class JournalHandler(logging.Handler):
             extras['EXCEPTION_INFO'] = record.exc_info
 
         if hasattr(record, "_daiquiri_extra_keys"):
-            for k, v in record._daiquiri_extra_keys:
+            for k in record._daiquiri_extra_keys:
                 if k != "_daiquiri_extra_keys":
                     extras[k.upper()] = getattr(record, k)
 
