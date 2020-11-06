@@ -2,12 +2,7 @@ pull_request_rules:
   - name: automatic merge
     conditions:
       - base=master
-      - "status-success=ci/circleci: pep8"
-      - "status-success=ci/circleci: docs"
-      - "status-success=ci/circleci: py27"
-      - "status-success=ci/circleci: py36"
-      - "status-success=ci/circleci: py37"
-      - "status-success=ci/circleci: py38"
+      - "status-success=ci/circleci: test"
       - "#approved-reviews-by>=1"
       - label!=work-in-progress
     actions:
@@ -20,12 +15,7 @@ pull_request_rules:
   - name: automatic merge from maintainer
     conditions:
       - author=jd
-      - "status-success=ci/circleci: pep8"
-      - "status-success=ci/circleci: docs"
-      - "status-success=ci/circleci: py27"
-      - "status-success=ci/circleci: py36"
-      - "status-success=ci/circleci: py37"
-      - "status-success=ci/circleci: py38"
+      - "status-success=ci/circleci: test"
       - "#approved-reviews-by>=1"
       - label!=work-in-progress
     actions:
