@@ -14,8 +14,7 @@ import logging
 import syslog
 import unittest
 from datetime import timedelta
-
-import mock
+from unittest import mock
 
 import daiquiri
 from daiquiri import output

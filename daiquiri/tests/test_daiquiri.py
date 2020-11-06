@@ -9,12 +9,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import io
 import json
 import logging
 import unittest
 import warnings
-
-import six.moves
 
 import daiquiri
 
@@ -31,7 +30,7 @@ class TestDaiquiri(unittest.TestCase):
         daiquiri.setup(program_name="foobar")
 
     def test_setup_json_formatter(self):
-        stream = six.moves.StringIO()
+        stream = io.StringIO()
         daiquiri.setup(outputs=(
             daiquiri.output.Stream(
                 stream, formatter=daiquiri.formatter.JSON_FORMATTER),
@@ -41,7 +40,7 @@ class TestDaiquiri(unittest.TestCase):
                          json.loads(stream.getvalue()))
 
     def test_setup_json_formatter_with_extras(self):
-        stream = six.moves.StringIO()
+        stream = io.StringIO()
         daiquiri.setup(outputs=(
             daiquiri.output.Stream(
                 stream, formatter=daiquiri.formatter.JSON_FORMATTER),
@@ -55,19 +54,19 @@ class TestDaiquiri(unittest.TestCase):
         logger.setLevel(logging.DEBUG)
 
     def test_capture_warnings(self):
-        stream = six.moves.StringIO()
+        stream = io.StringIO()
         daiquiri.setup(outputs=(
             daiquiri.output.Stream(stream),
         ))
         warnings.warn("omg!")
         line = stream.getvalue()
         self.assertIn("WARNING  py.warnings: ", line)
-        self.assertIn("daiquiri/tests/test_daiquiri.py:62: "
+        self.assertIn("daiquiri/tests/test_daiquiri.py:61: "
                       "UserWarning: omg!\n  warnings.warn(\"omg!\")\n",
                       line)
 
     def test_no_capture_warnings(self):
-        stream = six.moves.StringIO()
+        stream = io.StringIO()
         daiquiri.setup(outputs=(
             daiquiri.output.Stream(stream),
         ), capture_warnings=False)
@@ -93,7 +92,7 @@ class TestDaiquiri(unittest.TestCase):
 
 
 def test_extra_with_two_loggers():
-    stream = six.moves.StringIO()
+    stream = io.StringIO()
     daiquiri.setup(outputs=(
         daiquiri.output.Stream(stream),
     ))

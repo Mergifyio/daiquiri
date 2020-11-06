@@ -23,11 +23,6 @@ jobs:
       - image: circleci/python:3.8
     steps:
       - tox: {target: docs}
-  py27:
-    docker:
-      - image: circleci/python:2.7
-    steps:
-      - tox: {target: py27}
   py36:
     docker:
       - image: circleci/python:3.6
@@ -51,7 +46,6 @@ workflows:
   test:
     jobs:
       - pep8
-      - py27
       - py36
       - py37
       - py38
