@@ -19,7 +19,7 @@ from daiquiri import output
 
 
 class KeywordArgumentAdapter(logging.LoggerAdapter):
-    """Logger adapter to add keyword arguments to log record's extra data
+    """Logger adapter to add keyword arguments to log record's extra data.
 
     Keywords passed to the log call are added to the "extra"
     dictionary passed to the underlying logger so they are emitted
@@ -52,9 +52,7 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
     if sys.version_info.major == 2:
 
         def setLevel(self, level):
-            """
-            Set the specified level on the underlying logger.
-            """
+            """Set the specified level on the underlying logger."""
             self.logger.setLevel(level)
 
 
@@ -75,14 +73,14 @@ def setup(
     capture_warnings=True,
     set_excepthook=True,
 ):
-    """Setup Python logging.
+    """Set up Python logging.
 
-    This will setup basic handlers for Python logging.
+    This sets up basic handlers for Python logging.
 
     :param level: Root log level.
     :param outputs: Iterable of outputs to log to.
     :param program_name: The name of the program. Auto-detected if not set.
-    :param capture_warnings: Capture warnings from the `warnings' module.
+    :param capture_warnings: Capture warnings from the `warnings` module.
     """
     root_logger = logging.getLogger(None)
 
@@ -118,8 +116,7 @@ def parse_and_set_default_log_levels(default_log_levels, separator="="):
     """Set default log levels for some loggers.
 
     :param default_log_levels: List of strings with format
-    <logger_name><separator><log_level>
-
+                               <logger_name><separator><log_level>
     """
     return set_default_log_levels(
         (pair.split(separator, 1) for pair in default_log_levels)

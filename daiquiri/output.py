@@ -27,6 +27,7 @@ from daiquiri import handlers
 
 
 def get_program_name():
+    """Return the name of the running program."""
     return os.path.basename(inspect.stack()[-1][1])
 
 
@@ -79,14 +80,18 @@ class File(Output):
     ):
         """Log file output.
 
-        :param filename: The log file path to write to.
-        If directory is also specified, both will be combined.
-        :param directory: The log directory to write to.
-        If no filename is specified, the program name and suffix will be used
-        to contruct the full path relative to the directory.
-        :param suffix: The log file name suffix.
-        This will be only used if no filename has been provided.
+        :param filename: The log file path to write to. If directory is also
+                         specified, both will be combined.
+
+        :param directory: The log directory to write to. If no filename is
+                          specified, the program name and suffix will be used
+                          to contruct the full path relative to the directory.
+
+        :param suffix: The log file name suffix. This will be only used if no
+                       filename has been provided.
+
         :param program_name: Program name. Autodetected by default.
+
         """
         logpath = _get_log_file_path(filename, directory, program_name, suffix)
         handler = logging.handlers.WatchedFileHandler(logpath)
@@ -109,18 +114,24 @@ class RotatingFile(Output):
     ):
         """Rotating log file output.
 
-        :param filename: The log file path to write to.
-        If directory is also specified, both will be combined.
-        :param directory: The log directory to write to.
-        If no filename is specified, the program name and suffix will be used
-        to contruct the full path relative to the directory.
-        :param suffix: The log file name suffix.
-        This will be only used if no filename has been provided.
+        :param filename: The log file path to write to. If directory is also
+                         specified, both will be combined.
+
+        :param directory: The log directory to write to. If no filename is
+                          specified, the program name and suffix will be used
+                          to contruct the full path relative to the directory.
+
+        :param suffix: The log file name suffix. This will be only used if no
+                       filename has been provided.
+
         :param program_name: Program name. Autodetected by default.
-        :param max_size_bytes: allow the file to rollover at a
-        predetermined size.
-        :param backup_count: the maximum number of files to rotate
-        logging output between.
+
+        :param max_size_bytes: Allow the file to rollover at a predetermined
+                               size.
+
+        :param backup_count: The maximum number of files to rotate logging
+                             output between.
+
         """
         logpath = _get_log_file_path(filename, directory, program_name, suffix)
         handler = logging.handlers.RotatingFileHandler(
@@ -149,18 +160,23 @@ class TimedRotatingFile(Output):
     ):
         """Rotating log file output, triggered by a fixed interval.
 
-        :param filename: The log file path to write to.
-        If directory is also specified, both will be combined.
-        :param directory: The log directory to write to.
-        If no filename is specified, the program name and suffix will be used
-        to contruct the full path relative to the directory.
-        :param suffix: The log file name suffix.
-        This will be only used if no filename has been provided.
+        :param filename: The log file path to write to. If directory is also
+                         specified, both will be combined.
+
+        :param directory: The log directory to write to. If no filename is
+                          specified, the program name and suffix will be used
+                          to contruct the full path relative to the directory.
+
+        :param suffix: The log file name suffix. This will be only used if no
+                       filename has been provided.
+
         :param program_name: Program name. Autodetected by default.
-        :param interval: datetime.timedelta instance representing
-        how often a new log file should be created.
-        :param backup_count: the maximum number of files to rotate
-        logging output between.
+
+        :param interval: datetime.timedelta instance representing how often a
+                         new log file should be created.
+
+        :param backup_count: The maximum number of files to rotate logging
+                             output between.
         """
         logpath = _get_log_file_path(filename, directory, program_name, suffix)
         handler = logging.handlers.TimedRotatingFileHandler(
@@ -177,8 +193,7 @@ class TimedRotatingFile(Output):
 
     @staticmethod
     def _timedelta_to_seconds(td):
-        """Convert a datetime.timedelta object into a seconds interval for
-        rotating file ouput.
+        """Convert a datetime.timedelta object into a seconds interval.
 
         :param td: datetime.timedelta
         :return: time in seconds
