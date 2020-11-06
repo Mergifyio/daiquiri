@@ -31,23 +31,29 @@ class TestDaiquiri(unittest.TestCase):
 
     def test_setup_json_formatter(self):
         stream = io.StringIO()
-        daiquiri.setup(outputs=(
-            daiquiri.output.Stream(
-                stream, formatter=daiquiri.formatter.JSON_FORMATTER),
-        ))
+        daiquiri.setup(
+            outputs=(
+                daiquiri.output.Stream(
+                    stream, formatter=daiquiri.formatter.JSON_FORMATTER
+                ),
+            )
+        )
         daiquiri.getLogger(__name__).warning("foobar")
-        self.assertEqual({"message": "foobar"},
-                         json.loads(stream.getvalue()))
+        self.assertEqual({"message": "foobar"}, json.loads(stream.getvalue()))
 
     def test_setup_json_formatter_with_extras(self):
         stream = io.StringIO()
-        daiquiri.setup(outputs=(
-            daiquiri.output.Stream(
-                stream, formatter=daiquiri.formatter.JSON_FORMATTER),
-        ))
+        daiquiri.setup(
+            outputs=(
+                daiquiri.output.Stream(
+                    stream, formatter=daiquiri.formatter.JSON_FORMATTER
+                ),
+            )
+        )
         daiquiri.getLogger(__name__).warning("foobar", foo="bar")
-        self.assertEqual({"message": "foobar", "foo": "bar"},
-                         json.loads(stream.getvalue()))
+        self.assertEqual(
+            {"message": "foobar", "foo": "bar"}, json.loads(stream.getvalue())
+        )
 
     def test_get_logger_set_level(self):
         logger = daiquiri.getLogger(__name__)
@@ -55,47 +61,43 @@ class TestDaiquiri(unittest.TestCase):
 
     def test_capture_warnings(self):
         stream = io.StringIO()
-        daiquiri.setup(outputs=(
-            daiquiri.output.Stream(stream),
-        ))
+        daiquiri.setup(outputs=(daiquiri.output.Stream(stream),))
         warnings.warn("omg!")
         line = stream.getvalue()
         self.assertIn("WARNING  py.warnings: ", line)
-        self.assertIn("daiquiri/tests/test_daiquiri.py:61: "
-                      "UserWarning: omg!\n  warnings.warn(\"omg!\")\n",
-                      line)
+        self.assertIn(
+            "daiquiri/tests/test_daiquiri.py:65: "
+            'UserWarning: omg!\n  warnings.warn("omg!")\n',
+            line,
+        )
 
     def test_no_capture_warnings(self):
         stream = io.StringIO()
-        daiquiri.setup(outputs=(
-            daiquiri.output.Stream(stream),
-        ), capture_warnings=False)
+        daiquiri.setup(
+            outputs=(daiquiri.output.Stream(stream),), capture_warnings=False
+        )
         warnings.warn("omg!")
         self.assertEqual("", stream.getvalue())
 
     def test_set_default_log_levels(self):
-        daiquiri.set_default_log_levels((("amqp", "debug"),
-                                         ("urllib3", "warn")))
+        daiquiri.set_default_log_levels((("amqp", "debug"), ("urllib3", "warn")))
 
     def test_parse_and_set_default_log_levels(self):
-        daiquiri.parse_and_set_default_log_levels(
-            ("urllib3=warn", "foobar=debug"))
+        daiquiri.parse_and_set_default_log_levels(("urllib3=warn", "foobar=debug"))
 
     def test_string_as_setup_outputs_arg(self):
-        daiquiri.setup(outputs=('stderr', 'stdout'))
+        daiquiri.setup(outputs=("stderr", "stdout"))
 
         if daiquiri.handlers.syslog is not None:
-            daiquiri.setup(outputs=('syslog',))
+            daiquiri.setup(outputs=("syslog",))
 
         if daiquiri.handlers.journal is not None:
-            daiquiri.setup(outputs=('journal',))
+            daiquiri.setup(outputs=("journal",))
 
 
 def test_extra_with_two_loggers():
     stream = io.StringIO()
-    daiquiri.setup(outputs=(
-        daiquiri.output.Stream(stream),
-    ))
+    daiquiri.setup(outputs=(daiquiri.output.Stream(stream),))
     log1 = daiquiri.getLogger("foobar")
     log1.error("argh")
     log2 = daiquiri.getLogger("foobar", key="value")

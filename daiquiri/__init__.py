@@ -37,19 +37,20 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
         # Make a new extra dictionary combining the values we were
         # given when we were constructed and anything from kwargs.
         extra = self.extra.copy()
-        if 'extra' in kwargs:
-            extra.update(kwargs.pop('extra'))
+        if "extra" in kwargs:
+            extra.update(kwargs.pop("extra"))
         # Move any unknown keyword arguments into the extra
         # dictionary.
         for name in list(kwargs.keys()):
-            if name == 'exc_info':
+            if name == "exc_info":
                 continue
             extra[name] = kwargs.pop(name)
-        extra['_daiquiri_extra_keys'] = set(extra.keys())
-        kwargs['extra'] = extra
+        extra["_daiquiri_extra_keys"] = set(extra.keys())
+        kwargs["extra"] = extra
         return msg, kwargs
 
     if sys.version_info.major == 2:
+
         def setLevel(self, level):
             """
             Set the specified level on the underlying logger.
@@ -67,8 +68,13 @@ def getLogger(name=None, **kwargs):
     return KeywordArgumentAdapter(logging.getLogger(name), kwargs)
 
 
-def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
-          capture_warnings=True, set_excepthook=True):
+def setup(
+    level=logging.WARNING,
+    outputs=[output.STDERR],
+    program_name=None,
+    capture_warnings=True,
+    set_excepthook=True,
+):
     """Setup Python logging.
 
     This will setup basic handlers for Python logging.
@@ -99,7 +105,8 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
 
         def logging_excepthook(exc_type, value, tb):
             program_logger.critical(
-                "".join(traceback.format_exception(exc_type, value, tb)))
+                "".join(traceback.format_exception(exc_type, value, tb))
+            )
 
         sys.excepthook = logging_excepthook
 
@@ -107,15 +114,16 @@ def setup(level=logging.WARNING, outputs=[output.STDERR], program_name=None,
         logging.captureWarnings(True)
 
 
-def parse_and_set_default_log_levels(default_log_levels, separator='='):
+def parse_and_set_default_log_levels(default_log_levels, separator="="):
     """Set default log levels for some loggers.
 
     :param default_log_levels: List of strings with format
     <logger_name><separator><log_level>
 
     """
-    return set_default_log_levels((pair.split(separator, 1)
-                                   for pair in default_log_levels))
+    return set_default_log_levels(
+        (pair.split(separator, 1) for pair in default_log_levels)
+    )
 
 
 def set_default_log_levels(loggers_and_log_levels):

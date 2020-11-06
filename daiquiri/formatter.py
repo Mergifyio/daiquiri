@@ -30,14 +30,14 @@ class ColorFormatter(logging.Formatter):
 
     # TODO(jd) Allow configuration
     LEVEL_COLORS = {
-        logging.DEBUG: '\033[00;32m',  # GREEN
-        logging.INFO: '\033[00;36m',  # CYAN
-        logging.WARN: '\033[01;33m',  # BOLD YELLOW
-        logging.ERROR: '\033[01;31m',  # BOLD RED
-        logging.CRITICAL: '\033[01;31m',  # BOLD RED
+        logging.DEBUG: "\033[00;32m",  # GREEN
+        logging.INFO: "\033[00;36m",  # CYAN
+        logging.WARN: "\033[01;33m",  # BOLD YELLOW
+        logging.ERROR: "\033[01;31m",  # BOLD RED
+        logging.CRITICAL: "\033[01;31m",  # BOLD RED
     }
 
-    COLOR_STOP = '\033[0m'
+    COLOR_STOP = "\033[0m"
 
     def add_color(self, record):
         if getattr(record, "_stream_is_a_tty", False):
@@ -92,13 +92,16 @@ class ExtrasFormatter(logging.Formatter):
       "extras" string is not empty.
     """
 
-    def __init__(self,
-                 keywords=None,
-                 extras_template='[{0}: {1}]',
-                 extras_separator=' ',
-                 extras_prefix=' ',
-                 extras_suffix='',
-                 *args, **kwargs):
+    def __init__(
+        self,
+        keywords=None,
+        extras_template="[{0}: {1}]",
+        extras_separator=" ",
+        extras_prefix=" ",
+        extras_suffix="",
+        *args,
+        **kwargs
+    ):
         self.keywords = set() if keywords is None else keywords
         self.extras_template = extras_template
         self.extras_separator = extras_separator
@@ -107,16 +110,16 @@ class ExtrasFormatter(logging.Formatter):
         super(ExtrasFormatter, self).__init__(*args, **kwargs)
 
     def add_extras(self, record):
-        if not hasattr(record, '_daiquiri_extra_keys'):
-            record.extras = ''
+        if not hasattr(record, "_daiquiri_extra_keys"):
+            record.extras = ""
             return
 
         extras = self.extras_separator.join(
             self.extras_template.format(k, getattr(record, k))
             for k in record._daiquiri_extra_keys
-            if k != '_daiquiri_extra_keys' and k not in self.keywords
+            if k != "_daiquiri_extra_keys" and k not in self.keywords
         )
-        if extras != '':
+        if extras != "":
             extras = self.extras_prefix + extras + self.extras_suffix
         record.extras = extras
 
@@ -145,16 +148,14 @@ class DatadogFormatter(jsonlogger.JsonFormatter):
         super(DatadogFormatter, self).__init__(timestamp=True)
 
     def add_fields(self, log_record, record, message_dict):
-        super(DatadogFormatter, self).add_fields(
-            log_record, record, message_dict
-        )
+        super(DatadogFormatter, self).add_fields(log_record, record, message_dict)
         log_record["status"] = record.levelname.lower()
         log_record["logger"] = {
             "name": record.name,
         }
         if record.exc_info:
             log_record["error"] = {
-                "kind":  record.exc_info[0].__name__,
+                "kind": record.exc_info[0].__name__,
                 "stack": message_dict.get("stack_info"),
                 "message": message_dict.get("exc_info"),
             }

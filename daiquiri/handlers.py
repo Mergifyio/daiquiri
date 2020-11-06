@@ -71,22 +71,22 @@ class JournalHandler(logging.Handler):
         message = self.format(record)
 
         extras = {
-            'CODE_FILE': record.pathname,
-            'CODE_LINE': record.lineno,
-            'CODE_FUNC': record.funcName,
-            'THREAD_NAME': record.threadName,
-            'PROCESS_NAME': record.processName,
-            'LOGGER_NAME': record.name,
-            'LOGGER_LEVEL': record.levelname,
-            'SYSLOG_IDENTIFIER': self.program_name,
-            'PRIORITY': priority
+            "CODE_FILE": record.pathname,
+            "CODE_LINE": record.lineno,
+            "CODE_FUNC": record.funcName,
+            "THREAD_NAME": record.threadName,
+            "PROCESS_NAME": record.processName,
+            "LOGGER_NAME": record.name,
+            "LOGGER_LEVEL": record.levelname,
+            "SYSLOG_IDENTIFIER": self.program_name,
+            "PRIORITY": priority,
         }
 
         if record.exc_text:
-            extras['EXCEPTION_TEXT'] = record.exc_text
+            extras["EXCEPTION_TEXT"] = record.exc_text
 
         if record.exc_info:
-            extras['EXCEPTION_INFO'] = record.exc_info
+            extras["EXCEPTION_INFO"] = record.exc_info
 
         if hasattr(record, "_daiquiri_extra_keys"):
             for k in record._daiquiri_extra_keys:
