@@ -230,9 +230,10 @@ class Syslog(Output):
 
 class Datadog(Output):
     def __init__(self, hostname="127.0.0.1", port=10518,
-                 formatter=formatter.DATADOG_FORMATTER, level=None):
+                 formatter=formatter.DATADOG_FORMATTER, level=None,
+                 handler_class=handlers.PlainTextSocketHandler):
         super(Datadog, self).__init__(
-            handlers.PlainTextSocketHandler(hostname, port),
+            handler_class(hostname, port),
             formatter=formatter, level=level,
         )
 
