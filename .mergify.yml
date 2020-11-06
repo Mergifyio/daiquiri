@@ -3,7 +3,7 @@ pull_request_rules:
     conditions:
       - base=master
       - "status-success=ci/circleci: test"
-      - "#approved-reviews-by>=1"
+      - status-success=test
       - label!=work-in-progress
     actions:
       merge:
@@ -15,8 +15,7 @@ pull_request_rules:
   - name: automatic merge from maintainer
     conditions:
       - author=jd
-      - "status-success=ci/circleci: test"
-      - "#approved-reviews-by>=1"
+      - status-success=test
       - label!=work-in-progress
     actions:
       merge:
