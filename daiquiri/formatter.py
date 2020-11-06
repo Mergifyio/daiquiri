@@ -9,6 +9,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+"""Formatters."""
+
 import logging
 
 from pythonjsonlogger import jsonlogger
@@ -26,7 +28,7 @@ DEFAULT_EXTRAS_FORMAT = (
 
 
 class ColorFormatter(logging.Formatter):
-    """Colorizes log output"""
+    """Colorizes log output."""
 
     # TODO(jd) Allow configuration
     LEVEL_COLORS = {
@@ -40,6 +42,7 @@ class ColorFormatter(logging.Formatter):
     COLOR_STOP = "\033[0m"
 
     def add_color(self, record):
+        """Add color to a record."""
         if getattr(record, "_stream_is_a_tty", False):
             record.color = self.LEVEL_COLORS[record.levelno]
             record.color_stop = self.COLOR_STOP
@@ -48,10 +51,12 @@ class ColorFormatter(logging.Formatter):
             record.color_stop = ""
 
     def remove_color(self, record):
+        """Remove color from a record."""
         del record.color
         del record.color_stop
 
     def format(self, record):
+        """Format a record."""
         self.add_color(record)
         s = super(ColorFormatter, self).format(record)
         self.remove_color(record)
@@ -63,10 +68,13 @@ class ExtrasFormatter(logging.Formatter):
 
     Any keywords passed to a logging call will be formatted into a
     "extras" string and included in a logging message.
+
     Example:
         logger.info('my message', extra='keyword')
+
     will cause an "extras" string of:
         [extra: keyword]
+
     to be inserted into the format in place of %(extras)s.
 
     The optional `keywords` argument must be passed into the init
@@ -77,19 +85,19 @@ class ExtrasFormatter(logging.Formatter):
     Special keywords:
 
     keywords
-      A set of strings containing keywords to filter out of the
-      "extras" string.
+        A set of strings containing keywords to filter out of the
+        "extras" string.
 
     extras_template
-      A format string to use instead of '[{0}: {1}]'
+        A format string to use instead of '[{0}: {1}]'
 
     extras_separator
-      What string to "join" multiple "extras" with.
+        What string to "join" multiple "extras" with.
 
     extras_prefix and extras_suffix
-      Strings which will be prepended and appended to the "extras"
-      string respectively. These will only be prepended if the
-      "extras" string is not empty.
+        Strings which will be prepended and appended to the "extras"
+        string respectively. These will only be prepended if the
+        "extras" string is not empty.
     """
 
     def __init__(
