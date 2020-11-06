@@ -9,10 +9,9 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import io
 import logging
 import unittest
-
-import six
 
 import daiquiri
 
@@ -22,7 +21,7 @@ class TestColorExtrasFormatter(unittest.TestCase):
     def setUpClass(cls):
         cls.logger = daiquiri.getLogger('my_module')
         cls.logger.setLevel(logging.INFO)
-        cls.stream = six.moves.StringIO()
+        cls.stream = io.StringIO()
         cls.handler = daiquiri.handlers.TTYDetectorStreamHandler(cls.stream)
         cls.logger.logger.addHandler(cls.handler)
         super(TestColorExtrasFormatter, cls).setUpClass()
@@ -32,7 +31,7 @@ class TestColorExtrasFormatter(unittest.TestCase):
         # getvalue() is the only way to see what's in the stream. However this
         # requires the stream to be reset every time.
         self.stream.close()
-        self.stream = six.moves.StringIO()
+        self.stream = io.StringIO()
         self.handler.stream = self.stream
         super(TestColorExtrasFormatter, self).setUp()
 
