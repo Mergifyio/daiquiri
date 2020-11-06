@@ -38,6 +38,11 @@ jobs:
       - image: circleci/python:3.8
     steps:
       - tox: {target: py38}
+  py39:
+    docker:
+      - image: circleci/python:3.9
+    steps:
+      - tox: {target: py39}
 
 
 workflows:
@@ -49,4 +54,5 @@ workflows:
       - py36
       - py37
       - py38
+      - py39
       - docs
