@@ -28,41 +28,41 @@ class DatadogMatcher(object):
         return json.loads(other.decode()[:-1]) == self.expected
 
     def __repr__(self):
-        return "b'" + json.dumps(
-            self.expected, default=lambda x: "unserializable"
-        ) + "\\n'"
+        return (
+            "b'"
+            + json.dumps(self.expected, default=lambda x: "unserializable")
+            + "\\n'"
+        )
 
 
 class TestOutput(unittest.TestCase):
     def test_find_facility(self):
-        self.assertEqual(syslog.LOG_USER,
-                         output.Syslog._find_facility("user"))
-        self.assertEqual(syslog.LOG_LOCAL1,
-                         output.Syslog._find_facility("log_local1"))
-        self.assertEqual(syslog.LOG_LOCAL2,
-                         output.Syslog._find_facility("LOG_local2"))
-        self.assertEqual(syslog.LOG_LOCAL3,
-                         output.Syslog._find_facility("LOG_LOCAL3"))
-        self.assertEqual(syslog.LOG_LOCAL4,
-                         output.Syslog._find_facility("LOCaL4"))
+        self.assertEqual(syslog.LOG_USER, output.Syslog._find_facility("user"))
+        self.assertEqual(syslog.LOG_LOCAL1, output.Syslog._find_facility("log_local1"))
+        self.assertEqual(syslog.LOG_LOCAL2, output.Syslog._find_facility("LOG_local2"))
+        self.assertEqual(syslog.LOG_LOCAL3, output.Syslog._find_facility("LOG_LOCAL3"))
+        self.assertEqual(syslog.LOG_LOCAL4, output.Syslog._find_facility("LOCaL4"))
 
     def test_get_log_file_path(self):
-        self.assertEqual("foobar.log",
-                         output._get_log_file_path("foobar.log"))
-        self.assertEqual("/var/log/foo/foobar.log",
-                         output._get_log_file_path("foobar.log",
-                                                   logdir="/var/log/foo"))
-        self.assertEqual("/var/log/foobar.log",
-                         output._get_log_file_path(logdir="/var/log",
-                                                   program_name="foobar"))
-        self.assertEqual("/var/log/foobar.log",
-                         output._get_log_file_path(logdir="/var/log",
-                                                   program_name="foobar"))
-        self.assertEqual("/var/log/foobar.journal",
-                         output._get_log_file_path(
-                             logdir="/var/log",
-                             logfile_suffix=".journal",
-                             program_name="foobar"))
+        self.assertEqual("foobar.log", output._get_log_file_path("foobar.log"))
+        self.assertEqual(
+            "/var/log/foo/foobar.log",
+            output._get_log_file_path("foobar.log", logdir="/var/log/foo"),
+        )
+        self.assertEqual(
+            "/var/log/foobar.log",
+            output._get_log_file_path(logdir="/var/log", program_name="foobar"),
+        )
+        self.assertEqual(
+            "/var/log/foobar.log",
+            output._get_log_file_path(logdir="/var/log", program_name="foobar"),
+        )
+        self.assertEqual(
+            "/var/log/foobar.journal",
+            output._get_log_file_path(
+                logdir="/var/log", logfile_suffix=".journal", program_name="foobar"
+            ),
+        )
 
     def test_timedelta_seconds(self):
         fn = output.TimedRotatingFile._timedelta_to_seconds
@@ -73,26 +73,28 @@ class TestOutput(unittest.TestCase):
             timedelta(minutes=60),
             timedelta(seconds=hour),
             hour,
-            float(hour)
+            float(hour),
         ]
         for t in one_hour:
             self.assertEqual(hour, fn(t))
 
         error_cases = [
-            'string',
-            ['some', 'list'],
-            ('some', 'tuple',),
-            ('tuple',),
-            {'dict': 'mapping'}
+            "string",
+            ["some", "list"],
+            (
+                "some",
+                "tuple",
+            ),
+            ("tuple",),
+            {"dict": "mapping"},
         ]
         for t in error_cases:
             self.assertRaises(AttributeError, fn, t)
 
     def test_datadog(self):
-        with mock.patch('socket.socket') as mock_socket:
+        with mock.patch("socket.socket") as mock_socket:
             socket_instance = mock_socket.return_value
-            daiquiri.setup(outputs=(daiquiri.output.Datadog(),),
-                           level=logging.DEBUG)
+            daiquiri.setup(outputs=(daiquiri.output.Datadog(),), level=logging.DEBUG)
             logger = daiquiri.getLogger()
             logger.error("foo", bar=1)
             logger.info("bar")
@@ -101,22 +103,44 @@ class TestOutput(unittest.TestCase):
             except ZeroDivisionError:
                 logger = daiquiri.getLogger("saymyname")
                 logger.error("backtrace", exc_info=True)
-            socket_instance.connect.assert_called_once_with(
-                ("127.0.0.1", 10518)
+            socket_instance.connect.assert_called_once_with(("127.0.0.1", 10518))
+            socket_instance.sendall.assert_has_calls(
+                [
+                    mock.call(
+                        DatadogMatcher(
+                            {
+                                "status": "error",
+                                "message": "foo",
+                                "bar": 1,
+                                "logger": {"name": "root"},
+                                "timestamp": mock.ANY,
+                            }
+                        )
+                    ),
+                    mock.call(
+                        DatadogMatcher(
+                            {
+                                "status": "info",
+                                "message": "bar",
+                                "logger": {"name": "root"},
+                                "timestamp": mock.ANY,
+                            }
+                        )
+                    ),
+                    mock.call(
+                        DatadogMatcher(
+                            {
+                                "status": "error",
+                                "message": "backtrace",
+                                "logger": {"name": "saymyname"},
+                                "timestamp": mock.ANY,
+                                "error": {
+                                    "kind": "ZeroDivisionError",
+                                    "stack": None,
+                                    "message": mock.ANY,
+                                },
+                            }
+                        )
+                    ),
+                ]
             )
-            socket_instance.sendall.assert_has_calls([
-                mock.call(DatadogMatcher({
-                    "status": "error", "message": "foo", "bar": 1,
-                    "logger": {"name": "root"}, "timestamp": mock.ANY,
-                })),
-                mock.call(DatadogMatcher({
-                    "status": "info", "message": "bar",
-                    "logger": {"name": "root"}, "timestamp": mock.ANY,
-                })),
-                mock.call(DatadogMatcher({
-                    "status": "error", "message": "backtrace",
-                    "logger": {"name": "saymyname"}, "timestamp": mock.ANY,
-                    "error": {"kind": "ZeroDivisionError", "stack": None,
-                              "message": mock.ANY}
-                })),
-            ])

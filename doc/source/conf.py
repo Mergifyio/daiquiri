@@ -1,3 +1,3 @@
-master_doc = 'index'
+master_doc = "index"
 project = "Daiquiri"
-extensions = ['sphinx.ext.autodoc']
+extensions = ["sphinx.ext.autodoc"]

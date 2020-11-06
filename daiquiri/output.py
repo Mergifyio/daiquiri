@@ -16,6 +16,7 @@ import logging.handlers
 import numbers
 import os
 import sys
+
 try:
     import syslog
 except ImportError:
@@ -32,8 +33,7 @@ def get_program_name():
 class Output(object):
     """Generic log output."""
 
-    def __init__(self, handler, formatter=formatter.TEXT_FORMATTER,
-                 level=None):
+    def __init__(self, handler, formatter=formatter.TEXT_FORMATTER, level=None):
         self.handler = handler
         self.handler.setFormatter(formatter)
         if level is not None:
@@ -44,8 +44,9 @@ class Output(object):
         logger.addHandler(self.handler)
 
 
-def _get_log_file_path(logfile=None, logdir=None, program_name=None,
-                       logfile_suffix=".log"):
+def _get_log_file_path(
+    logfile=None, logdir=None, program_name=None, logfile_suffix=".log"
+):
     ret_path = None
 
     if not logdir:
@@ -67,9 +68,15 @@ def _get_log_file_path(logfile=None, logdir=None, program_name=None,
 class File(Output):
     """Ouput to a file."""
 
-    def __init__(self, filename=None, directory=None, suffix=".log",
-                 program_name=None, formatter=formatter.TEXT_FORMATTER,
-                 level=None):
+    def __init__(
+        self,
+        filename=None,
+        directory=None,
+        suffix=".log",
+        program_name=None,
+        formatter=formatter.TEXT_FORMATTER,
+        level=None,
+    ):
         """Log file output.
 
         :param filename: The log file path to write to.
@@ -81,8 +88,7 @@ class File(Output):
         This will be only used if no filename has been provided.
         :param program_name: Program name. Autodetected by default.
         """
-        logpath = _get_log_file_path(filename, directory,
-                                     program_name, suffix)
+        logpath = _get_log_file_path(filename, directory, program_name, suffix)
         handler = logging.handlers.WatchedFileHandler(logpath)
         super(File, self).__init__(handler, formatter, level)
 
@@ -90,9 +96,17 @@ class File(Output):
 class RotatingFile(Output):
     """Output to a file, rotating after a certain size."""
 
-    def __init__(self, filename=None, directory=None, suffix='.log',
-                 program_name=None, formatter=formatter.TEXT_FORMATTER,
-                 level=None, max_size_bytes=0, backup_count=0):
+    def __init__(
+        self,
+        filename=None,
+        directory=None,
+        suffix=".log",
+        program_name=None,
+        formatter=formatter.TEXT_FORMATTER,
+        level=None,
+        max_size_bytes=0,
+        backup_count=0,
+    ):
         """Rotating log file output.
 
         :param filename: The log file path to write to.
@@ -108,10 +122,10 @@ class RotatingFile(Output):
         :param backup_count: the maximum number of files to rotate
         logging output between.
         """
-        logpath = _get_log_file_path(filename, directory,
-                                     program_name, suffix)
+        logpath = _get_log_file_path(filename, directory, program_name, suffix)
         handler = logging.handlers.RotatingFileHandler(
-            logpath, maxBytes=max_size_bytes, backupCount=backup_count)
+            logpath, maxBytes=max_size_bytes, backupCount=backup_count
+        )
         super(RotatingFile, self).__init__(handler, formatter, level)
 
     def do_rollover(self):
@@ -122,10 +136,17 @@ class RotatingFile(Output):
 class TimedRotatingFile(Output):
     """Rotating log file output, triggered by a fixed interval."""
 
-    def __init__(self, filename=None, directory=None, suffix='.log',
-                 program_name=None, formatter=formatter.TEXT_FORMATTER,
-                 level=None, interval=datetime.timedelta(hours=24),
-                 backup_count=0):
+    def __init__(
+        self,
+        filename=None,
+        directory=None,
+        suffix=".log",
+        program_name=None,
+        formatter=formatter.TEXT_FORMATTER,
+        level=None,
+        interval=datetime.timedelta(hours=24),
+        backup_count=0,
+    ):
         """Rotating log file output, triggered by a fixed interval.
 
         :param filename: The log file path to write to.
@@ -141,13 +162,13 @@ class TimedRotatingFile(Output):
         :param backup_count: the maximum number of files to rotate
         logging output between.
         """
-        logpath = _get_log_file_path(filename, directory,
-                                     program_name, suffix)
+        logpath = _get_log_file_path(filename, directory, program_name, suffix)
         handler = logging.handlers.TimedRotatingFileHandler(
             logpath,
-            when='S',
+            when="S",
             interval=self._timedelta_to_seconds(interval),
-            backupCount=backup_count)
+            backupCount=backup_count,
+        )
         super(TimedRotatingFile, self).__init__(handler, formatter, level)
 
     def do_rollover(self):
@@ -171,10 +192,12 @@ class TimedRotatingFile(Output):
 class Stream(Output):
     """Generic stream output."""
 
-    def __init__(self, stream=sys.stderr, formatter=formatter.TEXT_FORMATTER,
-                 level=None):
-        super(Stream, self).__init__(handlers.TTYDetectorStreamHandler(stream),
-                                     formatter, level)
+    def __init__(
+        self, stream=sys.stderr, formatter=formatter.TEXT_FORMATTER, level=None
+    ):
+        super(Stream, self).__init__(
+            handlers.TTYDetectorStreamHandler(stream), formatter, level
+        )
 
 
 STDERR = Stream()
@@ -182,38 +205,65 @@ STDOUT = Stream(sys.stdout)
 
 
 class Journal(Output):
-    def __init__(self, program_name=None,
-                 formatter=formatter.TEXT_FORMATTER, level=None):
+    def __init__(
+        self, program_name=None, formatter=formatter.TEXT_FORMATTER, level=None
+    ):
         program_name = program_name or get_program_name
-        super(Journal, self).__init__(handlers.JournalHandler(program_name),
-                                      formatter, level)
+        super(Journal, self).__init__(
+            handlers.JournalHandler(program_name), formatter, level
+        )
 
 
 class Syslog(Output):
-    def __init__(self, program_name=None, facility="user",
-                 formatter=formatter.TEXT_FORMATTER, level=None):
+    def __init__(
+        self,
+        program_name=None,
+        facility="user",
+        formatter=formatter.TEXT_FORMATTER,
+        level=None,
+    ):
         if syslog is None:
             # FIXME(jd) raise something more specific
             raise RuntimeError("syslog is not available on this platform")
         super(Syslog, self).__init__(
             handlers.SyslogHandler(
                 program_name=program_name or get_program_name(),
-                facility=self._find_facility(facility)),
-            formatter, level)
+                facility=self._find_facility(facility),
+            ),
+            formatter,
+            level,
+        )
 
     @staticmethod
     def _find_facility(facility):
         # NOTE(jd): Check the validity of facilities at run time as they differ
         # depending on the OS and Python version being used.
-        valid_facilities = [f for f in
-                            ["LOG_KERN", "LOG_USER", "LOG_MAIL",
-                             "LOG_DAEMON", "LOG_AUTH", "LOG_SYSLOG",
-                             "LOG_LPR", "LOG_NEWS", "LOG_UUCP",
-                             "LOG_CRON", "LOG_AUTHPRIV", "LOG_FTP",
-                             "LOG_LOCAL0", "LOG_LOCAL1", "LOG_LOCAL2",
-                             "LOG_LOCAL3", "LOG_LOCAL4", "LOG_LOCAL5",
-                             "LOG_LOCAL6", "LOG_LOCAL7"]
-                            if getattr(syslog, f, None)]
+        valid_facilities = [
+            f
+            for f in [
+                "LOG_KERN",
+                "LOG_USER",
+                "LOG_MAIL",
+                "LOG_DAEMON",
+                "LOG_AUTH",
+                "LOG_SYSLOG",
+                "LOG_LPR",
+                "LOG_NEWS",
+                "LOG_UUCP",
+                "LOG_CRON",
+                "LOG_AUTHPRIV",
+                "LOG_FTP",
+                "LOG_LOCAL0",
+                "LOG_LOCAL1",
+                "LOG_LOCAL2",
+                "LOG_LOCAL3",
+                "LOG_LOCAL4",
+                "LOG_LOCAL5",
+                "LOG_LOCAL6",
+                "LOG_LOCAL7",
+            ]
+            if getattr(syslog, f, None)
+        ]
 
         facility = facility.upper()
 
@@ -221,30 +271,37 @@ class Syslog(Output):
             facility = "LOG_" + facility
 
         if facility not in valid_facilities:
-            raise TypeError('syslog facility must be one of: %s' %
-                            ', '.join("'%s'" % fac
-                                      for fac in valid_facilities))
+            raise TypeError(
+                "syslog facility must be one of: %s"
+                % ", ".join("'%s'" % fac for fac in valid_facilities)
+            )
 
         return getattr(syslog, facility)
 
 
 class Datadog(Output):
-    def __init__(self, hostname="127.0.0.1", port=10518,
-                 formatter=formatter.DATADOG_FORMATTER, level=None,
-                 handler_class=handlers.PlainTextSocketHandler):
+    def __init__(
+        self,
+        hostname="127.0.0.1",
+        port=10518,
+        formatter=formatter.DATADOG_FORMATTER,
+        level=None,
+        handler_class=handlers.PlainTextSocketHandler,
+    ):
         super(Datadog, self).__init__(
             handler_class(hostname, port),
-            formatter=formatter, level=level,
+            formatter=formatter,
+            level=level,
         )
 
 
 preconfigured = {
-    'stderr': STDERR,
-    'stdout': STDOUT,
+    "stderr": STDERR,
+    "stdout": STDOUT,
 }
 
 if syslog is not None:
-    preconfigured['syslog'] = Syslog()
+    preconfigured["syslog"] = Syslog()
 
 if handlers.journal is not None:
-    preconfigured['journal'] = Journal()
+    preconfigured["journal"] = Journal()
