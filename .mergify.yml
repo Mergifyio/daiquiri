@@ -17,3 +17,17 @@ pull_request_rules:
     conditions: []
     actions:
       dismiss_reviews: {}
+  - name: automatic merge from maintainer
+    conditions:
+      - author=jd
+      - "status-success=ci/circleci: pep8"
+      - "status-success=ci/circleci: docs"
+      - "status-success=ci/circleci: py27"
+      - "status-success=ci/circleci: py36"
+      - "status-success=ci/circleci: py37"
+      - "status-success=ci/circleci: py38"
+      - "#approved-reviews-by>=1"
+      - label!=work-in-progress
+    actions:
+      merge:
+        strict: "smart"
