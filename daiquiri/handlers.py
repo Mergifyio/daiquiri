@@ -122,3 +122,14 @@ class PlainTextSocketHandler(logging.handlers.SocketHandler):
 
     def makePickle(self, record):
         return self.format(record).encode(self.encoding) + b"\n"
+
+
+class PlainTextDatagramHandler(logging.handlers.DatagramHandler):
+    """Socket handler that uses format and encode the record."""
+
+    def __init__(self, hostname, port, encoding="utf-8"):
+        self.encoding = encoding
+        super(PlainTextDatagramHandler, self).__init__(hostname, port)
+
+    def makePickle(self, record):
+        return self.format(record).encode(self.encoding) + b"\n"
