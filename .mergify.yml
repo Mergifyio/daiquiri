@@ -2,8 +2,7 @@ pull_request_rules:
   - name: automatic merge
     conditions:
       - base=master
-      - "status-success=ci/circleci: test"
-      - status-success=test
+      - check-success=test
       - label!=work-in-progress
     actions:
       merge:
@@ -15,7 +14,7 @@ pull_request_rules:
   - name: automatic merge from maintainer
     conditions:
       - author=jd
-      - status-success=test
+      - check-success=test
       - label!=work-in-progress
     actions:
       merge:
