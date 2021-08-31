@@ -93,9 +93,11 @@ class TestDaiquiri(unittest.TestCase):
 
         if daiquiri.handlers.journal is not None:
             daiquiri.setup(outputs=("journal",))
-    
+
     def test_special_kwargs(self):
-        daiquiri.getLogger(__name__).info("foobar", foo="bar", exc_info=True, stack_info=True)
+        daiquiri.getLogger(__name__).info(
+            "foobar", foo="bar", exc_info=True, stack_info=True
+        )
 
 
 def test_extra_with_two_loggers():
