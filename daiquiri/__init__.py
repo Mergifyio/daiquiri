@@ -42,7 +42,7 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
         # Move any unknown keyword arguments into the extra
         # dictionary.
         for name in list(kwargs.keys()):
-            if name == "exc_info":
+            if name in ("exc_info", "stack_info"):
                 continue
             extra[name] = kwargs.pop(name)
         extra["_daiquiri_extra_keys"] = set(extra.keys())
