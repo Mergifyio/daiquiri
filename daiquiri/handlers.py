@@ -19,10 +19,11 @@ try:
     from systemd import journal
 except ImportError:
     journal = None
+
 try:
     import syslog
 except ImportError:
-    syslog = None
+    syslog = None  # type: ignore[assignment]
 
 
 # This is a copy of the numerical constants from syslog.h. The

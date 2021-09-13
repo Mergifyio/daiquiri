@@ -9,11 +9,13 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import collections.abc
 import logging
 import logging.config
 import logging.handlers
 import sys
 import traceback
+import typing
 
 from daiquiri import output
 
@@ -33,10 +35,13 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
 
     """
 
-    def process(self, msg, kwargs):
+    def process(
+        self, msg: typing.Any, kwargs: "collections.abc.MutableMapping[str, typing.Any]"
+    ) -> typing.Tuple[typing.Any, "collections.abc.MutableMapping[str, typing.Any]"]:
         # Make a new extra dictionary combining the values we were
         # given when we were constructed and anything from kwargs.
-        extra = self.extra.copy()
+        if self.extra is not None:
+            extra = dict(self.extra)
         if "extra" in kwargs:
             extra.update(kwargs.pop("extra"))
         # Move any unknown keyword arguments into the extra
@@ -56,7 +61,7 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
             self.logger.setLevel(level)
 
 
-def getLogger(name=None, **kwargs):
+def getLogger(name: typing.Optional[str] = None, **kwargs) -> KeywordArgumentAdapter:
     """Build a logger with the given name.
 
     :param name: The name for the logger. This is usually the module
@@ -67,11 +72,11 @@ def getLogger(name=None, **kwargs):
 
 
 def setup(
-    level=logging.WARNING,
-    outputs=[output.STDERR],
-    program_name=None,
-    capture_warnings=True,
-    set_excepthook=True,
+    level: int = logging.WARNING,
+    outputs: typing.List[output.Output] = [output.STDERR],
+    program_name: typing.Optional[str] = None,
+    capture_warnings: bool = True,
+    set_excepthook: bool = True,
 ):
     """Set up Python logging.
 
@@ -91,9 +96,10 @@ def setup(
     # Add configured handlers
     for out in outputs:
         if isinstance(out, str):
-            out = output.preconfigured.get(out)
-            if out is None:
+            if out not in output.preconfigured:
                 raise RuntimeError("Output {} is not available".format(out))
+            out = output.preconfigured[out]
+
         out.add_to_logger(root_logger)
 
     root_logger.setLevel(level)
@@ -112,18 +118,28 @@ def setup(
         logging.captureWarnings(True)
 
 
-def parse_and_set_default_log_levels(default_log_levels, separator="="):
+def parse_and_set_default_log_levels(
+    default_log_levels: typing.Iterable[str], separator: str = "="
+) -> None:
     """Set default log levels for some loggers.
 
     :param default_log_levels: List of strings with format
                                <logger_name><separator><log_level>
     """
-    return set_default_log_levels(
-        (pair.split(separator, 1) for pair in default_log_levels)
-    )
+    levels = []
+    for pair in default_log_levels:
+        result = pair.split(separator, 1)
+        if len(result) != 2:
+            raise ValueError("Wrong log level format: `%s`" % result)
+        levels.append(typing.cast(typing.Tuple[str, str], tuple(result)))
+    return set_default_log_levels(levels)
 
 
-def set_default_log_levels(loggers_and_log_levels):
+def set_default_log_levels(
+    loggers_and_log_levels: typing.Iterable[
+        typing.Tuple[typing.Optional[str], typing.Union[str, int]]
+    ]
+) -> None:
     """Set default log levels for some loggers.
 
     :param loggers_and_log_levels: List of tuple (logger name, level).

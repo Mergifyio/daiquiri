@@ -16,11 +16,12 @@ import logging.handlers
 import numbers
 import os
 import sys
+import typing
 
 try:
     import syslog
 except ImportError:
-    syslog = None
+    syslog = None  # type: ignore[assignment]
 
 from daiquiri import formatter
 from daiquiri import handlers
@@ -310,7 +311,8 @@ class Datadog(Output):
         )
 
 
-preconfigured = {
+# FIXME(jd): Is this useful? Remove it?
+preconfigured: typing.Dict[str, typing.Union[Stream, Output]] = {
     "stderr": STDERR,
     "stdout": STDOUT,
 }
