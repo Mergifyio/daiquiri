@@ -1,21 +1,27 @@
 pull_request_rules:
   - name: automatic merge
     conditions:
-      - base=master
+      - base=main
       - check-success=test
-      - label!=work-in-progress
     actions:
-      merge:
-        strict: "smart"
+      queue:
+        name: default
+
+  - name: automatic merge from maintainer
+    conditions:
+      - base=main
+      - author=jd
+      - check-success=test
+    actions:
+      queue:
+        name: default
+
   - name: dismiss reviews
     conditions: []
     actions:
       dismiss_reviews: {}
-  - name: automatic merge from maintainer
-    conditions:
-      - author=jd
-      - check-success=test
-      - label!=work-in-progress
-    actions:
-      merge:
-        strict: "smart"
+
+
+queue_rules:
+  - name: default
+    conditions: []
