@@ -3,6 +3,13 @@ pull_request_rules:
     conditions:
       - base=main
       - check-success=test
+      - and: &CheckRuns
+          - "check-success=CI / pep8"
+          - "check-success=CI / test (3.7)"
+          - "check-success=CI / test (3.8)"
+          - "check-success=CI / test (3.9)"
+          - "check-success=CI / test (3.10)"
+
     actions:
       queue:
         name: default
@@ -11,7 +18,7 @@ pull_request_rules:
     conditions:
       - base=main
       - author=jd
-      - check-success=test
+      - and: *CheckRuns
     actions:
       queue:
         name: default
