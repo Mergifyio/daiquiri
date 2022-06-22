@@ -2,6 +2,7 @@ pull_request_rules:
   - name: automatic merge
     conditions:
       - base=main
+      - "#approved-reviews-by>=1"
       - and: &CheckRuns
           - "check-success=pep8"
           - "check-success=test (3.7)"
