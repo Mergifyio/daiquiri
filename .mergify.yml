@@ -2,13 +2,12 @@ pull_request_rules:
   - name: automatic merge
     conditions:
       - base=main
-      - check-success=test
       - and: &CheckRuns
-          - "check-success=CI / pep8"
-          - "check-success=CI / test (3.7)"
-          - "check-success=CI / test (3.8)"
-          - "check-success=CI / test (3.9)"
-          - "check-success=CI / test (3.10)"
+          - "check-success=pep8"
+          - "check-success=test (3.7)"
+          - "check-success=test (3.8)"
+          - "check-success=test (3.9)"
+          - "check-success=test (3.10)"
 
     actions:
       queue:
