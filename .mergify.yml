@@ -13,15 +13,6 @@ pull_request_rules:
       queue:
         name: default
 
-  - name: automatic merge from maintainer
-    conditions:
-      - base=main
-      - author=jd
-      - and: *CheckRuns
-    actions:
-      queue:
-        name: default
-
   - name: dismiss reviews
     conditions: []
     actions:
