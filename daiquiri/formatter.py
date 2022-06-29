@@ -108,7 +108,7 @@ class ExtrasFormatter(logging.Formatter):
         extras_prefix=" ",
         extras_suffix="",
         *args,
-        **kwargs
+        **kwargs,
     ):
         self.keywords = set() if keywords is None else keywords
         self.extras_template = extras_template
