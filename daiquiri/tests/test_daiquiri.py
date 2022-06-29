@@ -19,17 +19,17 @@ import daiquiri
 
 
 class TestDaiquiri(unittest.TestCase):
-    def tearDown(self):
+    def tearDown(self) -> None:
         # Be sure to reset the warning capture
         logging.captureWarnings(False)
         super(TestDaiquiri, self).tearDown()
 
-    def test_setup(self):
+    def test_setup(self) -> None:
         daiquiri.setup()
         daiquiri.setup(level=logging.DEBUG)
         daiquiri.setup(program_name="foobar")
 
-    def test_setup_json_formatter(self):
+    def test_setup_json_formatter(self) -> None:
         stream = io.StringIO()
         daiquiri.setup(
             outputs=(
@@ -41,7 +41,7 @@ class TestDaiquiri(unittest.TestCase):
         daiquiri.getLogger(__name__).warning("foobar")
         self.assertEqual({"message": "foobar"}, json.loads(stream.getvalue()))
 
-    def test_setup_json_formatter_with_extras(self):
+    def test_setup_json_formatter_with_extras(self) -> None:
         stream = io.StringIO()
         daiquiri.setup(
             outputs=(
@@ -55,11 +55,11 @@ class TestDaiquiri(unittest.TestCase):
             {"message": "foobar", "foo": "bar"}, json.loads(stream.getvalue())
         )
 
-    def test_get_logger_set_level(self):
+    def test_get_logger_set_level(self) -> None:
         logger = daiquiri.getLogger(__name__)
         logger.setLevel(logging.DEBUG)
 
-    def test_capture_warnings(self):
+    def test_capture_warnings(self) -> None:
         stream = io.StringIO()
         daiquiri.setup(outputs=(daiquiri.output.Stream(stream),))
         warnings.warn("omg!")
@@ -71,7 +71,7 @@ class TestDaiquiri(unittest.TestCase):
             line,
         )
 
-    def test_no_capture_warnings(self):
+    def test_no_capture_warnings(self) -> None:
         stream = io.StringIO()
         daiquiri.setup(
             outputs=(daiquiri.output.Stream(stream),), capture_warnings=False
@@ -79,28 +79,28 @@ class TestDaiquiri(unittest.TestCase):
         warnings.warn("omg!")
         self.assertEqual("", stream.getvalue())
 
-    def test_set_default_log_levels(self):
+    def test_set_default_log_levels(self) -> None:
         daiquiri.set_default_log_levels((("amqp", "debug"), ("urllib3", "warn")))
 
-    def test_parse_and_set_default_log_levels(self):
+    def test_parse_and_set_default_log_levels(self) -> None:
         daiquiri.parse_and_set_default_log_levels(("urllib3=warn", "foobar=debug"))
 
-    def test_string_as_setup_outputs_arg(self):
+    def test_string_as_setup_outputs_arg(self) -> None:
         daiquiri.setup(outputs=("stderr", "stdout"))
 
-        if daiquiri.handlers.syslog is not None:
+        if daiquiri.handlers.syslog is not None:  # type: ignore[attr-defined]
             daiquiri.setup(outputs=("syslog",))
 
-        if daiquiri.handlers.journal is not None:
+        if daiquiri.handlers.journal is not None:  # type: ignore[attr-defined]
             daiquiri.setup(outputs=("journal",))
 
-    def test_special_kwargs(self):
+    def test_special_kwargs(self) -> None:
         daiquiri.getLogger(__name__).info(
             "foobar", foo="bar", exc_info=True, stack_info=True
         )
 
 
-def test_extra_with_two_loggers():
+def test_extra_with_two_loggers() -> None:
     stream = io.StringIO()
     daiquiri.setup(outputs=(daiquiri.output.Stream(stream),))
     log1 = daiquiri.getLogger("foobar")

@@ -15,12 +15,18 @@ import logging.config
 import logging.handlers
 import sys
 import traceback
+import types
 import typing
 
 from daiquiri import output
 
+if typing.TYPE_CHECKING:
+    _KeywordArgumentAdapterBase = logging.LoggerAdapter[logging.Logger]
+else:
+    _KeywordArgumentAdapterBase = logging.LoggerAdapter
 
-class KeywordArgumentAdapter(logging.LoggerAdapter):
+
+class KeywordArgumentAdapter(_KeywordArgumentAdapterBase):
     """Logger adapter to add keyword arguments to log record's extra data.
 
     Keywords passed to the log call are added to the "extra"
@@ -55,7 +61,9 @@ class KeywordArgumentAdapter(logging.LoggerAdapter):
         return msg, kwargs
 
 
-def getLogger(name: typing.Optional[str] = None, **kwargs) -> KeywordArgumentAdapter:
+def getLogger(
+    name: typing.Optional[str] = None, **kwargs: typing.Any
+) -> KeywordArgumentAdapter:
     """Build a logger with the given name.
 
     :param name: The name for the logger. This is usually the module
@@ -67,11 +75,11 @@ def getLogger(name: typing.Optional[str] = None, **kwargs) -> KeywordArgumentAda
 
 def setup(
     level: int = logging.WARNING,
-    outputs: typing.List[output.Output] = [output.STDERR],
+    outputs: typing.Iterable[typing.Union[output.Output, str]] = [output.STDERR],
     program_name: typing.Optional[str] = None,
     capture_warnings: bool = True,
     set_excepthook: bool = True,
-):
+) -> None:
     """Set up Python logging.
 
     This sets up basic handlers for Python logging.
@@ -101,7 +109,11 @@ def setup(
     if set_excepthook:
         program_logger = logging.getLogger(program_name)
 
-        def logging_excepthook(exc_type, value, tb):
+        def logging_excepthook(
+            exc_type: typing.Optional[typing.Type[BaseException]],
+            value: typing.Optional[BaseException],
+            tb: typing.Optional[types.TracebackType],
+        ) -> None:
             program_logger.critical(
                 "".join(traceback.format_exception(exc_type, value, tb))
             )

@@ -12,6 +12,7 @@
 import json
 import logging
 import syslog
+import typing
 import unittest
 from datetime import timedelta
 from unittest import mock
@@ -21,13 +22,13 @@ from daiquiri import output
 
 
 class DatadogMatcher(object):
-    def __init__(self, expected):
+    def __init__(self, expected: typing.Any) -> None:
         self.expected = expected
 
-    def __eq__(self, other):
-        return json.loads(other.decode()[:-1]) == self.expected
+    def __eq__(self, other: typing.Any) -> bool:
+        return bool(json.loads(other.decode()[:-1]) == self.expected)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             "b'"
             + json.dumps(self.expected, default=lambda x: "unserializable")
@@ -36,14 +37,14 @@ class DatadogMatcher(object):
 
 
 class TestOutput(unittest.TestCase):
-    def test_find_facility(self):
+    def test_find_facility(self) -> None:
         self.assertEqual(syslog.LOG_USER, output.Syslog._find_facility("user"))
         self.assertEqual(syslog.LOG_LOCAL1, output.Syslog._find_facility("log_local1"))
         self.assertEqual(syslog.LOG_LOCAL2, output.Syslog._find_facility("LOG_local2"))
         self.assertEqual(syslog.LOG_LOCAL3, output.Syslog._find_facility("LOG_LOCAL3"))
         self.assertEqual(syslog.LOG_LOCAL4, output.Syslog._find_facility("LOCaL4"))
 
-    def test_get_log_file_path(self):
+    def test_get_log_file_path(self) -> None:
         self.assertEqual("foobar.log", output._get_log_file_path("foobar.log"))
         self.assertEqual(
             "/var/log/foo/foobar.log",
@@ -64,7 +65,7 @@ class TestOutput(unittest.TestCase):
             ),
         )
 
-    def test_timedelta_seconds(self):
+    def test_timedelta_seconds(self) -> None:
         fn = output.TimedRotatingFile._timedelta_to_seconds
         hour = 60 * 60  # seconds * minutes
 
@@ -72,11 +73,12 @@ class TestOutput(unittest.TestCase):
             timedelta(hours=1),
             timedelta(minutes=60),
             timedelta(seconds=hour),
-            hour,
-            float(hour),
         ]
         for t in one_hour:
             self.assertEqual(hour, fn(t))
+
+        assert hour == fn(float(hour))
+        assert hour == fn(hour)
 
         error_cases = [
             "string",
@@ -88,10 +90,10 @@ class TestOutput(unittest.TestCase):
             ("tuple",),
             {"dict": "mapping"},
         ]
-        for t in error_cases:
+        for t in error_cases:  # type: ignore[assignment]
             self.assertRaises(AttributeError, fn, t)
 
-    def test_datadog(self):
+    def test_datadog(self) -> None:
         with mock.patch("socket.socket") as mock_socket:
             socket_instance = mock_socket.return_value
             daiquiri.setup(outputs=(daiquiri.output.Datadog(),), level=logging.DEBUG)

@@ -13,7 +13,6 @@ import datetime
 import inspect
 import logging
 import logging.handlers
-import numbers
 import os
 import sys
 import typing
@@ -27,28 +26,36 @@ from daiquiri import formatter
 from daiquiri import handlers
 
 
-def get_program_name():
+def get_program_name() -> str:
     """Return the name of the running program."""
     return os.path.basename(inspect.stack()[-1][1])
 
 
-class Output(object):
+class Output:
     """Generic log output."""
 
-    def __init__(self, handler, formatter=formatter.TEXT_FORMATTER, level=None):
+    def __init__(
+        self,
+        handler: logging.Handler,
+        formatter: logging.Formatter = formatter.TEXT_FORMATTER,
+        level: typing.Optional[int] = None,
+    ):
         self.handler = handler
         self.handler.setFormatter(formatter)
         if level is not None:
             self.handler.setLevel(level)
 
-    def add_to_logger(self, logger):
+    def add_to_logger(self, logger: logging.Logger) -> None:
         """Add this output to a logger."""
         logger.addHandler(self.handler)
 
 
 def _get_log_file_path(
-    logfile=None, logdir=None, program_name=None, logfile_suffix=".log"
-):
+    logfile: typing.Optional[str] = None,
+    logdir: typing.Optional[str] = None,
+    program_name: typing.Optional[str] = None,
+    logfile_suffix: str = ".log",
+) -> str:
     ret_path = None
 
     if not logdir:
@@ -72,12 +79,12 @@ class File(Output):
 
     def __init__(
         self,
-        filename=None,
-        directory=None,
-        suffix=".log",
-        program_name=None,
-        formatter=formatter.TEXT_FORMATTER,
-        level=None,
+        filename: typing.Optional[str] = None,
+        directory: typing.Optional[str] = None,
+        suffix: str = ".log",
+        program_name: typing.Optional[str] = None,
+        formatter: logging.Formatter = formatter.TEXT_FORMATTER,
+        level: typing.Optional[int] = None,
     ):
         """Log file output.
 
@@ -102,16 +109,18 @@ class File(Output):
 class RotatingFile(Output):
     """Output to a file, rotating after a certain size."""
 
+    handler: logging.handlers.RotatingFileHandler
+
     def __init__(
         self,
-        filename=None,
-        directory=None,
-        suffix=".log",
-        program_name=None,
-        formatter=formatter.TEXT_FORMATTER,
-        level=None,
-        max_size_bytes=0,
-        backup_count=0,
+        filename: typing.Optional[str] = None,
+        directory: typing.Optional[str] = None,
+        suffix: str = ".log",
+        program_name: typing.Optional[str] = None,
+        formatter: logging.Formatter = formatter.TEXT_FORMATTER,
+        level: typing.Optional[int] = None,
+        max_size_bytes: int = 0,
+        backup_count: int = 0,
     ):
         """Rotating log file output.
 
@@ -140,7 +149,7 @@ class RotatingFile(Output):
         )
         super(RotatingFile, self).__init__(handler, formatter, level)
 
-    def do_rollover(self):
+    def do_rollover(self) -> None:
         """Manually forces a log file rotation."""
         return self.handler.doRollover()
 
@@ -148,16 +157,20 @@ class RotatingFile(Output):
 class TimedRotatingFile(Output):
     """Rotating log file output, triggered by a fixed interval."""
 
+    handler: logging.handlers.TimedRotatingFileHandler
+
     def __init__(
         self,
-        filename=None,
-        directory=None,
-        suffix=".log",
-        program_name=None,
-        formatter=formatter.TEXT_FORMATTER,
-        level=None,
-        interval=datetime.timedelta(hours=24),
-        backup_count=0,
+        filename: typing.Optional[str] = None,
+        directory: typing.Optional[str] = None,
+        suffix: str = ".log",
+        program_name: typing.Optional[str] = None,
+        formatter: logging.Formatter = formatter.TEXT_FORMATTER,
+        level: typing.Optional[int] = None,
+        interval: typing.Union[float, int, datetime.timedelta] = datetime.timedelta(
+            hours=24
+        ),
+        backup_count: int = 0,
     ):
         """Rotating log file output, triggered by a fixed interval.
 
@@ -183,24 +196,26 @@ class TimedRotatingFile(Output):
         handler = logging.handlers.TimedRotatingFileHandler(
             logpath,
             when="S",
-            interval=self._timedelta_to_seconds(interval),
+            interval=int(self._timedelta_to_seconds(interval)),
             backupCount=backup_count,
         )
         super(TimedRotatingFile, self).__init__(handler, formatter, level)
 
-    def do_rollover(self):
+    def do_rollover(self) -> None:
         """Manually forces a log file rotation."""
         return self.handler.doRollover()
 
     @staticmethod
-    def _timedelta_to_seconds(td):
+    def _timedelta_to_seconds(
+        td: typing.Union[float, int, datetime.timedelta]
+    ) -> float:
         """Convert a datetime.timedelta object into a seconds interval.
 
         :param td: datetime.timedelta
         :return: time in seconds
         :rtype: int
         """
-        if isinstance(td, numbers.Real):
+        if isinstance(td, (int, float)):
             td = datetime.timedelta(seconds=td)
         return td.total_seconds()
 
@@ -209,8 +224,11 @@ class Stream(Output):
     """Generic stream output."""
 
     def __init__(
-        self, stream=sys.stderr, formatter=formatter.TEXT_FORMATTER, level=None
-    ):
+        self,
+        stream: typing.TextIO = sys.stderr,
+        formatter: logging.Formatter = formatter.TEXT_FORMATTER,
+        level: typing.Optional[int] = None,
+    ) -> None:
         super(Stream, self).__init__(
             handlers.TTYDetectorStreamHandler(stream), formatter, level
         )
@@ -222,9 +240,12 @@ STDOUT = Stream(sys.stdout)
 
 class Journal(Output):
     def __init__(
-        self, program_name=None, formatter=formatter.TEXT_FORMATTER, level=None
-    ):
-        program_name = program_name or get_program_name
+        self,
+        program_name: typing.Optional[str] = None,
+        formatter: logging.Formatter = formatter.TEXT_FORMATTER,
+        level: typing.Optional[int] = None,
+    ) -> None:
+        program_name = program_name or get_program_name()
         super(Journal, self).__init__(
             handlers.JournalHandler(program_name), formatter, level
         )
@@ -233,11 +254,11 @@ class Journal(Output):
 class Syslog(Output):
     def __init__(
         self,
-        program_name=None,
-        facility="user",
-        formatter=formatter.TEXT_FORMATTER,
-        level=None,
-    ):
+        program_name: typing.Optional[str] = None,
+        facility: str = "user",
+        formatter: logging.Formatter = formatter.TEXT_FORMATTER,
+        level: typing.Optional[int] = None,
+    ) -> None:
         if syslog is None:
             # FIXME(jd) raise something more specific
             raise RuntimeError("syslog is not available on this platform")
@@ -251,7 +272,7 @@ class Syslog(Output):
         )
 
     @staticmethod
-    def _find_facility(facility):
+    def _find_facility(facility: str) -> int:
         # NOTE(jd): Check the validity of facilities at run time as they differ
         # depending on the OS and Python version being used.
         valid_facilities = [
@@ -292,17 +313,19 @@ class Syslog(Output):
                 % ", ".join("'%s'" % fac for fac in valid_facilities)
             )
 
-        return getattr(syslog, facility)
+        return int(getattr(syslog, facility))
 
 
 class Datadog(Output):
     def __init__(
         self,
-        hostname="127.0.0.1",
-        port=10518,
-        formatter=formatter.DATADOG_FORMATTER,
-        level=None,
-        handler_class=handlers.PlainTextSocketHandler,
+        hostname: str = "127.0.0.1",
+        port: int = 10518,
+        formatter: logging.Formatter = formatter.DATADOG_FORMATTER,
+        level: typing.Optional[int] = None,
+        handler_class: typing.Type[
+            handlers.PlainTextSocketHandler
+        ] = handlers.PlainTextSocketHandler,
     ):
         super(Datadog, self).__init__(
             handler_class(hostname, port),
@@ -320,5 +343,5 @@ preconfigured: typing.Dict[str, typing.Union[Stream, Output]] = {
 if syslog is not None:
     preconfigured["syslog"] = Syslog()
 
-if handlers.journal is not None:
+if handlers.journal is not None:  # type: ignore[attr-defined]
     preconfigured["journal"] = Journal()
