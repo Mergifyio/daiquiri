@@ -12,6 +12,7 @@
 """Formatters."""
 
 import logging
+import typing
 
 from pythonjsonlogger import jsonlogger
 
@@ -41,21 +42,21 @@ class ColorFormatter(logging.Formatter):
 
     COLOR_STOP = "\033[0m"
 
-    def add_color(self, record):
+    def add_color(self, record: logging.LogRecord) -> None:
         """Add color to a record."""
         if getattr(record, "_stream_is_a_tty", False):
-            record.color = self.LEVEL_COLORS[record.levelno]
-            record.color_stop = self.COLOR_STOP
+            record.color = self.LEVEL_COLORS[record.levelno]  # type: ignore[attr-defined]
+            record.color_stop = self.COLOR_STOP  # type: ignore[attr-defined]
         else:
-            record.color = ""
-            record.color_stop = ""
+            record.color = ""  # type: ignore[attr-defined]
+            record.color_stop = ""  # type: ignore[attr-defined]
 
-    def remove_color(self, record):
+    def remove_color(self, record: logging.LogRecord) -> None:
         """Remove color from a record."""
-        del record.color
-        del record.color_stop
+        del record.color  # type: ignore[attr-defined]
+        del record.color_stop  # type: ignore[attr-defined]
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         """Format a record."""
         self.add_color(record)
         s = super(ColorFormatter, self).format(record)
@@ -102,14 +103,14 @@ class ExtrasFormatter(logging.Formatter):
 
     def __init__(
         self,
-        keywords=None,
-        extras_template="[{0}: {1}]",
-        extras_separator=" ",
-        extras_prefix=" ",
-        extras_suffix="",
-        *args,
-        **kwargs,
-    ):
+        keywords: typing.Optional[typing.Set[str]] = None,
+        extras_template: str = "[{0}: {1}]",
+        extras_separator: str = " ",
+        extras_prefix: str = " ",
+        extras_suffix: str = "",
+        *args: typing.Any,
+        **kwargs: typing.Any,
+    ) -> None:
         self.keywords = set() if keywords is None else keywords
         self.extras_template = extras_template
         self.extras_separator = extras_separator
@@ -117,24 +118,24 @@ class ExtrasFormatter(logging.Formatter):
         self.extras_suffix = extras_suffix
         super(ExtrasFormatter, self).__init__(*args, **kwargs)
 
-    def add_extras(self, record):
+    def add_extras(self, record: logging.LogRecord) -> None:
         if not hasattr(record, "_daiquiri_extra_keys"):
-            record.extras = ""
+            record.extras = ""  # type: ignore[attr-defined]
             return
 
         extras = self.extras_separator.join(
             self.extras_template.format(k, getattr(record, k))
-            for k in record._daiquiri_extra_keys
+            for k in record._daiquiri_extra_keys  # type: ignore[attr-defined]
             if k != "_daiquiri_extra_keys" and k not in self.keywords
         )
         if extras != "":
             extras = self.extras_prefix + extras + self.extras_suffix
-        record.extras = extras
+        record.extras = extras  # type: ignore[attr-defined]
 
-    def remove_extras(self, record):
-        del record.extras
+    def remove_extras(self, record: logging.LogRecord) -> None:
+        del record.extras  # type: ignore[attr-defined]
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         self.add_extras(record)
         s = super(ExtrasFormatter, self).format(record)
         self.remove_extras(record)
@@ -144,24 +145,29 @@ class ExtrasFormatter(logging.Formatter):
 class ColorExtrasFormatter(ColorFormatter, ExtrasFormatter):
     """Combines functionality of ColorFormatter and ExtrasFormatter."""
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         self.add_color(record)
         s = ExtrasFormatter.format(self, record)
         self.remove_color(record)
         return s
 
 
-class DatadogFormatter(jsonlogger.JsonFormatter):
-    def __init__(self):
+class DatadogFormatter(jsonlogger.JsonFormatter):  # type: ignore[misc]
+    def __init__(self) -> None:
         super(DatadogFormatter, self).__init__(timestamp=True)
 
-    def add_fields(self, log_record, record, message_dict):
+    def add_fields(
+        self,
+        log_record: typing.Dict[str, typing.Any],
+        record: logging.LogRecord,
+        message_dict: typing.Dict[str, str],
+    ) -> None:
         super(DatadogFormatter, self).add_fields(log_record, record, message_dict)
         log_record["status"] = record.levelname.lower()
         log_record["logger"] = {
             "name": record.name,
         }
-        if record.exc_info:
+        if record.exc_info and record.exc_info[0]:
             log_record["error"] = {
                 "kind": record.exc_info[0].__name__,
                 "stack": message_dict.get("stack_info"),

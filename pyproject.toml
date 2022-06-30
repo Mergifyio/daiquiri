@@ -1,2 +1,14 @@
 [tool.black]
 target-version = ['py37', 'py38', 'py39', 'py310']
+
+[tool.mypy]
+files = "daiquiri"
+show_error_codes = true
+strict = true
+
+[[tool.mypy.overrides]]
+module = [
+       "pythonjsonlogger",
+       "systemd",
+]
+ignore_missing_imports = true

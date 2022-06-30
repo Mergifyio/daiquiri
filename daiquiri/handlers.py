@@ -14,11 +14,13 @@
 import logging
 import logging.config
 import logging.handlers
+import typing
 
 try:
     from systemd import journal
 except ImportError:
     journal = None
+
 
 try:
     import syslog
@@ -43,7 +45,9 @@ SYSLOG_MAP = {
 class SyslogHandler(logging.Handler):
     """Syslog based handler. Only available on UNIX-like platforms."""
 
-    def __init__(self, program_name, facility=None):
+    def __init__(
+        self, program_name: str, facility: typing.Optional[int] = None
+    ) -> None:
         # Default values always get evaluated, for which reason we avoid
         # using 'syslog' directly, which may not be available.
         facility = facility if facility is not None else syslog.LOG_USER
@@ -52,7 +56,7 @@ class SyslogHandler(logging.Handler):
         super(SyslogHandler, self).__init__()
         syslog.openlog(program_name, 0, facility)
 
-    def emit(self, record):
+    def emit(self, record: logging.LogRecord) -> None:
         priority = SYSLOG_MAP.get(record.levelname, 7)
         message = self.format(record)
         syslog.syslog(priority, message)
@@ -61,13 +65,15 @@ class SyslogHandler(logging.Handler):
 class JournalHandler(logging.Handler):
     """Journald based handler. Only available on platforms using systemd."""
 
-    def __init__(self, program_name):
+    program_name: str
+
+    def __init__(self, program_name: str) -> None:
         if not journal:
             raise RuntimeError("Systemd bindings do not exist")
         super(JournalHandler, self).__init__()
         self.program_name = program_name
 
-    def emit(self, record):
+    def emit(self, record: logging.LogRecord) -> None:
         priority = SYSLOG_MAP.get(record.levelname, 7)
         message = self.format(record)
 
@@ -90,47 +96,53 @@ class JournalHandler(logging.Handler):
             extras["EXCEPTION_INFO"] = record.exc_info
 
         if hasattr(record, "_daiquiri_extra_keys"):
-            for k in record._daiquiri_extra_keys:
+            for k in record._daiquiri_extra_keys:  # type: ignore[attr-defined]
                 if k != "_daiquiri_extra_keys":
                     extras[k.upper()] = getattr(record, k)
 
         journal.send(message, **extras)
 
 
-class TTYDetectorStreamHandler(logging.StreamHandler):
+if typing.TYPE_CHECKING:
+    _TTYDetectorStreamHandlerBase = logging.StreamHandler[typing.Any]
+else:
+    _TTYDetectorStreamHandlerBase = logging.StreamHandler
+
+
+class TTYDetectorStreamHandler(_TTYDetectorStreamHandlerBase):
     """Stream handler that adds a hint in the record if the stream is a TTY."""
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         if hasattr(self.stream, "isatty"):
             try:
-                record._stream_is_a_tty = self.stream.isatty()
+                record._stream_is_a_tty = self.stream.isatty()  # type: ignore[attr-defined]
             except ValueError:
                 # Stream has been closed, usually during interpretor shutdown
-                record._stream_is_a_tty = False
+                record._stream_is_a_tty = False  # type: ignore[attr-defined]
         else:
-            record._stream_is_a_tty = False
+            record._stream_is_a_tty = False  # type: ignore[attr-defined]
         s = super(TTYDetectorStreamHandler, self).format(record)
-        del record._stream_is_a_tty
+        del record._stream_is_a_tty  # type: ignore[attr-defined]
         return s
 
 
 class PlainTextSocketHandler(logging.handlers.SocketHandler):
     """Socket handler that uses format and encode the record."""
 
-    def __init__(self, hostname, port, encoding="utf-8"):
+    def __init__(self, hostname: str, port: int, encoding: str = "utf-8") -> None:
         self.encoding = encoding
         super(PlainTextSocketHandler, self).__init__(hostname, port)
 
-    def makePickle(self, record):
+    def makePickle(self, record: logging.LogRecord) -> bytes:
         return self.format(record).encode(self.encoding) + b"\n"
 
 
 class PlainTextDatagramHandler(logging.handlers.DatagramHandler):
     """Socket handler that uses format and encode the record."""
 
-    def __init__(self, hostname, port, encoding="utf-8"):
+    def __init__(self, hostname: str, port: int, encoding: str = "utf-8") -> None:
         self.encoding = encoding
         super(PlainTextDatagramHandler, self).__init__(hostname, port)
 
-    def makePickle(self, record):
+    def makePickle(self, record: logging.LogRecord) -> bytes:
         return self.format(record).encode(self.encoding) + b"\n"

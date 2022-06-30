@@ -17,8 +17,12 @@ import daiquiri
 
 
 class TestColorExtrasFormatter(unittest.TestCase):
+    logger: daiquiri.KeywordArgumentAdapter
+    stream: io.StringIO
+    handler: daiquiri.handlers.TTYDetectorStreamHandler
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         cls.logger = daiquiri.getLogger("my_module")
         cls.logger.setLevel(logging.INFO)
         cls.stream = io.StringIO()
@@ -26,7 +30,7 @@ class TestColorExtrasFormatter(unittest.TestCase):
         cls.logger.logger.addHandler(cls.handler)
         super(TestColorExtrasFormatter, cls).setUpClass()
 
-    def setUp(self):
+    def setUp(self) -> None:
         # Couldn't get readline() to return anything no matter what I tried, so
         # getvalue() is the only way to see what's in the stream. However this
         # requires the stream to be reset every time.
@@ -35,7 +39,7 @@ class TestColorExtrasFormatter(unittest.TestCase):
         self.handler.stream = self.stream
         super(TestColorExtrasFormatter, self).setUp()
 
-    def test_no_keywords(self):
+    def test_no_keywords(self) -> None:
         format_string = "%(levelname)s %(name)s%(extras)s: %(message)s"
         formatter = daiquiri.formatter.ColorExtrasFormatter(fmt=format_string)
         self.handler.setFormatter(formatter)
@@ -43,7 +47,7 @@ class TestColorExtrasFormatter(unittest.TestCase):
         self.logger.info("test message")
         self.assertEqual(self.stream.getvalue(), "INFO my_module: test message\n")
 
-    def test_no_keywords_with_extras(self):
+    def test_no_keywords_with_extras(self) -> None:
         format_string = "%(levelname)s %(name)s%(extras)s: %(message)s"
         formatter = daiquiri.formatter.ColorExtrasFormatter(fmt=format_string)
         self.handler.setFormatter(formatter)
@@ -53,10 +57,11 @@ class TestColorExtrasFormatter(unittest.TestCase):
             self.stream.getvalue(), "INFO my_module [test: a]: test message\n"
         )
 
-    def test_empty_keywords(self):
+    def test_empty_keywords(self) -> None:
         format_string = "%(levelname)s %(name)s%(extras)s: %(message)s"
         formatter = daiquiri.formatter.ColorExtrasFormatter(
-            fmt=format_string, keywords=[]
+            fmt=format_string,
+            keywords=set(),
         )
         self.handler.setFormatter(formatter)
 
@@ -65,20 +70,20 @@ class TestColorExtrasFormatter(unittest.TestCase):
             self.stream.getvalue(), "INFO my_module [test: a]: test message\n"
         )
 
-    def test_keywords_no_extras(self):
+    def test_keywords_no_extras(self) -> None:
         format_string = "%(levelname)s %(name)s" " %(test)s%(extras)s: %(message)s"
         formatter = daiquiri.formatter.ColorExtrasFormatter(
-            fmt=format_string, keywords=["test"]
+            fmt=format_string, keywords={"test"}
         )
         self.handler.setFormatter(formatter)
 
         self.logger.info("test message", test="a")
         self.assertEqual(self.stream.getvalue(), "INFO my_module a: test message\n")
 
-    def test_keywords_with_extras(self):
+    def test_keywords_with_extras(self) -> None:
         format_string = "%(levelname)s %(name)s" " %(test)s%(extras)s: %(message)s"
         formatter = daiquiri.formatter.ColorExtrasFormatter(
-            fmt=format_string, keywords=["test"]
+            fmt=format_string, keywords={"test"}
         )
         self.handler.setFormatter(formatter)
 
