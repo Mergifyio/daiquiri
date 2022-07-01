@@ -15,7 +15,7 @@ import logging.config
 import logging.handlers
 import sys
 import traceback
-import types
+import types as _ptypes
 import typing
 
 from daiquiri import output
@@ -112,7 +112,7 @@ def setup(
         def logging_excepthook(
             exc_type: typing.Optional[typing.Type[BaseException]],
             value: typing.Optional[BaseException],
-            tb: typing.Optional[types.TracebackType],
+            tb: typing.Optional[_ptypes.TracebackType],
         ) -> None:
             program_logger.critical(
                 "".join(traceback.format_exception(exc_type, value, tb))
