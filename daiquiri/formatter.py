@@ -16,6 +16,8 @@ import typing
 
 from pythonjsonlogger import jsonlogger
 
+from daiquiri import types
+
 
 DEFAULT_FORMAT = (
     "%(asctime)s [%(process)d] %(color)s%(levelname)-8.8s "
@@ -42,22 +44,23 @@ class ColorFormatter(logging.Formatter):
 
     COLOR_STOP = "\033[0m"
 
-    def add_color(self, record: logging.LogRecord) -> None:
+    def add_color(self, record: types.ColoredLogRecord) -> None:
         """Add color to a record."""
         if getattr(record, "_stream_is_a_tty", False):
-            record.color = self.LEVEL_COLORS[record.levelno]  # type: ignore[attr-defined]
-            record.color_stop = self.COLOR_STOP  # type: ignore[attr-defined]
+            record.color = self.LEVEL_COLORS[record.levelno]
+            record.color_stop = self.COLOR_STOP
         else:
-            record.color = ""  # type: ignore[attr-defined]
-            record.color_stop = ""  # type: ignore[attr-defined]
+            record.color = ""
+            record.color_stop = ""
 
-    def remove_color(self, record: logging.LogRecord) -> None:
+    def remove_color(self, record: types.ColoredLogRecord) -> None:
         """Remove color from a record."""
-        del record.color  # type: ignore[attr-defined]
-        del record.color_stop  # type: ignore[attr-defined]
+        del record.color
+        del record.color_stop
 
     def format(self, record: logging.LogRecord) -> str:
         """Format a record."""
+        record = typing.cast(types.ColoredLogRecord, record)
         self.add_color(record)
         s = super(ColorFormatter, self).format(record)
         self.remove_color(record)
@@ -118,24 +121,25 @@ class ExtrasFormatter(logging.Formatter):
         self.extras_suffix = extras_suffix
         super(ExtrasFormatter, self).__init__(*args, **kwargs)
 
-    def add_extras(self, record: logging.LogRecord) -> None:
+    def add_extras(self, record: types.ExtrasLogRecord) -> None:
         if not hasattr(record, "_daiquiri_extra_keys"):
-            record.extras = ""  # type: ignore[attr-defined]
+            record.extras = ""
             return
 
         extras = self.extras_separator.join(
             self.extras_template.format(k, getattr(record, k))
-            for k in record._daiquiri_extra_keys  # type: ignore[attr-defined]
+            for k in record._daiquiri_extra_keys
             if k != "_daiquiri_extra_keys" and k not in self.keywords
         )
         if extras != "":
             extras = self.extras_prefix + extras + self.extras_suffix
-        record.extras = extras  # type: ignore[attr-defined]
+        record.extras = extras
 
-    def remove_extras(self, record: logging.LogRecord) -> None:
-        del record.extras  # type: ignore[attr-defined]
+    def remove_extras(self, record: types.ExtrasLogRecord) -> None:
+        del record.extras
 
     def format(self, record: logging.LogRecord) -> str:
+        record = typing.cast(types.ExtrasLogRecord, record)
         self.add_extras(record)
         s = super(ExtrasFormatter, self).format(record)
         self.remove_extras(record)
@@ -146,6 +150,7 @@ class ColorExtrasFormatter(ColorFormatter, ExtrasFormatter):
     """Combines functionality of ColorFormatter and ExtrasFormatter."""
 
     def format(self, record: logging.LogRecord) -> str:
+        record = typing.cast(types.ColoredLogRecord, record)
         self.add_color(record)
         s = ExtrasFormatter.format(self, record)
         self.remove_color(record)

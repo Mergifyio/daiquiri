@@ -28,6 +28,8 @@ except ImportError:
     syslog = None  # type: ignore[assignment]
 
 
+from daiquiri import types
+
 # This is a copy of the numerical constants from syslog.h. The
 # definition of these goes back at least 20 years, and is specifically
 # 3 bits in a packed field, so these aren't likely to ever need
@@ -96,7 +98,8 @@ class JournalHandler(logging.Handler):
             extras["EXCEPTION_INFO"] = record.exc_info
 
         if hasattr(record, "_daiquiri_extra_keys"):
-            for k in record._daiquiri_extra_keys:  # type: ignore[attr-defined]
+            record = typing.cast(types.ExtrasLogRecord, record)
+            for k in record._daiquiri_extra_keys:
                 if k != "_daiquiri_extra_keys":
                     extras[k.upper()] = getattr(record, k)
 
@@ -113,16 +116,17 @@ class TTYDetectorStreamHandler(_TTYDetectorStreamHandlerBase):
     """Stream handler that adds a hint in the record if the stream is a TTY."""
 
     def format(self, record: logging.LogRecord) -> str:
+        record = typing.cast(types.TTYDetectionLogRecord, record)
         if hasattr(self.stream, "isatty"):
             try:
-                record._stream_is_a_tty = self.stream.isatty()  # type: ignore[attr-defined]
+                record._stream_is_a_tty = self.stream.isatty()
             except ValueError:
                 # Stream has been closed, usually during interpretor shutdown
-                record._stream_is_a_tty = False  # type: ignore[attr-defined]
+                record._stream_is_a_tty = False
         else:
-            record._stream_is_a_tty = False  # type: ignore[attr-defined]
+            record._stream_is_a_tty = False
         s = super(TTYDetectorStreamHandler, self).format(record)
-        del record._stream_is_a_tty  # type: ignore[attr-defined]
+        del record._stream_is_a_tty
         return s
 
 
