@@ -324,7 +324,7 @@ class Datadog(Output):
         formatter: logging.Formatter = formatter.DATADOG_FORMATTER,
         level: typing.Optional[int] = None,
         handler_class: typing.Type[
-            handlers.PlainTextSocketHandler
+            logging.handlers.SocketHandler
         ] = handlers.PlainTextSocketHandler,
     ):
         super(Datadog, self).__init__(
