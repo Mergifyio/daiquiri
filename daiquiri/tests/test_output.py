@@ -104,7 +104,7 @@ class TestOutput(unittest.TestCase):
                 1 / 0
             except ZeroDivisionError:
                 logger = daiquiri.getLogger("saymyname")
-                logger.error("backtrace", exc_info=True)
+                logger.exception("backtrace")
             socket_instance.connect.assert_called_once_with(("127.0.0.1", 10518))
             socket_instance.sendall.assert_has_calls(
                 [

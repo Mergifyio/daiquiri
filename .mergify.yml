@@ -2,17 +2,8 @@ pull_request_rules:
   - name: automatic merge
     conditions:
       - base=main
-      - "#approved-reviews-by>=1"
-      - and: &CheckRuns
-          - "check-success=pep8"
-          - "check-success=test (3.7)"
-          - "check-success=test (3.8)"
-          - "check-success=test (3.9)"
-          - "check-success=test (3.10)"
-
     actions:
       queue:
-        name: default
 
   - name: dismiss reviews
     conditions: []
@@ -22,4 +13,16 @@ pull_request_rules:
 
 queue_rules:
   - name: default
-    conditions: []
+    queue_conditions:
+      - "#approved-reviews-by>=1"
+      - "check-success=pep8"
+      - "check-success=test (3.8)"
+      - "check-success=test (3.9)"
+      - "check-success=test (3.10)"
+      - "check-success=test (3.11)"
+    merge_conditions:
+      - "check-success=pep8"
+      - "check-success=test (3.8)"
+      - "check-success=test (3.9)"
+      - "check-success=test (3.10)"
+      - "check-success=test (3.11)"

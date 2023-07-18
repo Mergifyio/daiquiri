@@ -10,9 +10,9 @@ jobs:
   test:
     strategy:
       matrix:
-        python: ["3.7", "3.8", "3.9", "3.10"]
+        python: ["3.8", "3.9", "3.10", "3.11"]
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v2.4.0
@@ -29,7 +29,7 @@ jobs:
         run: tox -e py$(echo ${{ matrix.python }} | tr -d .)
 
   pep8:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v2.4.0
@@ -37,7 +37,7 @@ jobs:
       - name: Setup Python 🔧
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Install tox
         run: pip install tox

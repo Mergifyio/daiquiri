@@ -157,9 +157,9 @@ class ColorExtrasFormatter(ColorFormatter, ExtrasFormatter):
         return s
 
 
-class DatadogFormatter(jsonlogger.JsonFormatter):  # type: ignore[misc]
+class DatadogFormatter(jsonlogger.JsonFormatter):
     def __init__(self) -> None:
-        super(DatadogFormatter, self).__init__(timestamp=True)
+        super(DatadogFormatter, self).__init__(timestamp=True)  # type: ignore[no-untyped-call]
 
     def add_fields(
         self,
@@ -183,5 +183,5 @@ class DatadogFormatter(jsonlogger.JsonFormatter):  # type: ignore[misc]
 
 
 TEXT_FORMATTER = ColorExtrasFormatter(fmt=DEFAULT_EXTRAS_FORMAT)
-JSON_FORMATTER = jsonlogger.JsonFormatter()
+JSON_FORMATTER = jsonlogger.JsonFormatter()  # type: ignore[no-untyped-call]
 DATADOG_FORMATTER = DatadogFormatter()
