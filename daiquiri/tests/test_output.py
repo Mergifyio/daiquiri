@@ -11,6 +11,7 @@
 #    under the License.
 import json
 import logging
+import sys
 import syslog
 import typing
 import unittest
@@ -100,6 +101,34 @@ class TestOutput(unittest.TestCase):
             logger = daiquiri.getLogger()
             logger.error("foo", bar=1)
             logger.info("bar")
+            expected_error_1 = {
+                "status": "error",
+                "message": "foo",
+                "bar": 1,
+                "logger": {"name": "root"},
+                "timestamp": mock.ANY,
+            }
+            expected_info_1 = {
+                "status": "info",
+                "message": "bar",
+                "logger": {"name": "root"},
+                "timestamp": mock.ANY,
+            }
+            expected_error_2 = {
+                "status": "error",
+                "message": "backtrace",
+                "logger": {"name": "saymyname"},
+                "timestamp": mock.ANY,
+                "error": {
+                    "kind": "ZeroDivisionError",
+                    "stack": None,
+                    "message": mock.ANY,
+                },
+            }
+            if sys.version_info >= (3, 12):
+                expected_error_1.update({"taskName": None})
+                expected_info_1.update({"taskName": None})
+                expected_error_2.update({"taskName": None})
             try:
                 1 / 0
             except ZeroDivisionError:
@@ -108,41 +137,8 @@ class TestOutput(unittest.TestCase):
             socket_instance.connect.assert_called_once_with(("127.0.0.1", 10518))
             socket_instance.sendall.assert_has_calls(
                 [
-                    mock.call(
-                        DatadogMatcher(
-                            {
-                                "status": "error",
-                                "message": "foo",
-                                "bar": 1,
-                                "logger": {"name": "root"},
-                                "timestamp": mock.ANY,
-                            }
-                        )
-                    ),
-                    mock.call(
-                        DatadogMatcher(
-                            {
-                                "status": "info",
-                                "message": "bar",
-                                "logger": {"name": "root"},
-                                "timestamp": mock.ANY,
-                            }
-                        )
-                    ),
-                    mock.call(
-                        DatadogMatcher(
-                            {
-                                "status": "error",
-                                "message": "backtrace",
-                                "logger": {"name": "saymyname"},
-                                "timestamp": mock.ANY,
-                                "error": {
-                                    "kind": "ZeroDivisionError",
-                                    "stack": None,
-                                    "message": mock.ANY,
-                                },
-                            }
-                        )
-                    ),
+                    mock.call(DatadogMatcher(expected_error_1)),
+                    mock.call(DatadogMatcher(expected_info_1)),
+                    mock.call(DatadogMatcher(expected_error_2)),
                 ]
             )
