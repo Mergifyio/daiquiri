@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # To make published trigger by this workflow
+      actions: write
     steps:
       - uses: actions/checkout@v4.1.1
         with:
