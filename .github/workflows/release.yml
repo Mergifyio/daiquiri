@@ -9,7 +9,7 @@ jobs:
     environment: release
     permissions:
       id-token: write
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v4.1.1
         with:
