@@ -1,0 +1,20 @@
+name: Tag next release
+on:
+  workflow_dispatch:
+
+jobs:
+  tag-next-release:
+    name: Tag next release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions/setup-python@v2.3.1
+        with:
+          python-version: 3.12
+      - run: |
+          pip install build setuptools_scm
+          tag="$(python3 -m setuptools_scm --strip-dev)"
+          git tag "$tag"
+          git push origin "$tag"
