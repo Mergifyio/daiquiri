@@ -1,25 +1,37 @@
-name: Tag next release
+name: upload release to PyPI
 on:
   workflow_dispatch:
 
 jobs:
-  tag-next-release:
-    name: Tag next release
+  pypi-publish:
+    name: upload release to PyPI
     runs-on: ubuntu-latest
+    environment: release
     permissions:
-      contents: write
-      # To make published trigger by this workflow
-      actions: write
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: 'true'
+
       - uses: actions/setup-python@v2.3.1
         with:
           python-version: 3.12
-      - run: |
-          pip install build setuptools_scm
+
+      - name: Install deps
+        run: pip install build setuptools_scm
+
+      - name: Tag the release
+        run: |
           tag="$(python3 -m setuptools_scm --strip-dev)"
           git tag "$tag"
           git push origin "$tag"
+
+      - name: Build the packages distributions
+        run: |
+          python3 -m build . --wheel --sdist
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
