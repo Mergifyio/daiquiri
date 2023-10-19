@@ -9,7 +9,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v4.1.1
         with:
           fetch-tags: 'true'
       - uses: actions/setup-python@v2.3.1
