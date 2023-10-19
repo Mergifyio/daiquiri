@@ -1,5 +1,51 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "daiquiri"
+requires-python = ">=3.8"
+dynamic = ["version"]
+license = {"text" = "Apache 2.0"}
+description = "Library to configure Python logging easily"
+readme = "README.rst"
+authors = [
+    {name = "Julien Danjou", email = "julien@danjou.info"}
+]
+classifiers = [
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "python-json-logger"
+]
+
+[project.urls]
+homepage = "https://github.com/Mergifyio/daiquiri"
+
+[tool.setuptools_scm]
+
+[tool.setuptools]
+packages = ["daiquiri"]
+
+[tool.setuptools.package-data]
+"daiquiri" = ["py.typed"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+systemd = ["systemd-python>=234"]
+
 [tool.black]
-target-version = ['py38', 'py39', 'py310', 'py311']
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
 
 [tool.mypy]
 files = "daiquiri"
