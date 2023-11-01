@@ -74,7 +74,7 @@ def getLogger(
 
 
 def setup(
-    level: int = logging.WARNING,
+    level: typing.Union[int, str] = logging.WARNING,
     outputs: typing.Iterable[typing.Union[output.Output, str]] = [output.STDERR],
     program_name: typing.Optional[str] = None,
     capture_warnings: bool = True,
