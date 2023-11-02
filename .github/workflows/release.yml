@@ -1,6 +1,7 @@
 name: upload release to PyPI
 on:
-  workflow_dispatch:
+  release:
+    - published
 
 jobs:
   pypi-publish:
@@ -19,15 +20,6 @@ jobs:
       - uses: actions/setup-python@v2.3.1
         with:
           python-version: 3.12
-
-      - name: Install deps
-        run: pip install build setuptools_scm
-
-      - name: Tag the release
-        run: |
-          tag="$(python3 -m setuptools_scm --strip-dev)"
-          git tag "$tag"
-          git push origin "$tag"
 
       - name: Build the packages distributions
         run: |
