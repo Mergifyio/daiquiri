@@ -22,6 +22,10 @@ jobs:
         with:
           python-version: 3.12
 
+      - name: Install build
+        run: |
+          python3 -m pip install build
+
       - name: Build the packages distributions
         run: |
           python3 -m build . --wheel --sdist
