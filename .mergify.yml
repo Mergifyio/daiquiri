@@ -16,8 +16,6 @@ queue_rules:
     queue_conditions:
       - "#approved-reviews-by>=1"
       - "check-success=pep8"
-      - "check-success=test (3.8)"
-      - "check-success=test (3.9)"
       - "check-success=test (3.10)"
       - "check-success=test (3.11)"
       - "check-success=test (3.12)"
