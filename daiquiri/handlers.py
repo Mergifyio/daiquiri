@@ -121,7 +121,7 @@ class TTYDetectorStreamHandler(_TTYDetectorStreamHandlerBase):
             try:
                 record._stream_is_a_tty = self.stream.isatty()
             except ValueError:
-                # Stream has been closed, usually during interpretor shutdown
+                # Stream has been closed, usually during interpreter shutdown
                 record._stream_is_a_tty = False
         else:
             record._stream_is_a_tty = False

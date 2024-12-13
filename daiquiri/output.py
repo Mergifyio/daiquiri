@@ -75,7 +75,7 @@ def _get_log_file_path(
 
 
 class File(Output):
-    """Ouput to a file."""
+    """Output to a file."""
 
     def __init__(
         self,
@@ -93,7 +93,7 @@ class File(Output):
 
         :param directory: The log directory to write to. If no filename is
                           specified, the program name and suffix will be used
-                          to contruct the full path relative to the directory.
+                          to construct the full path relative to the directory.
 
         :param suffix: The log file name suffix. This will be only used if no
                        filename has been provided.
@@ -129,7 +129,7 @@ class RotatingFile(Output):
 
         :param directory: The log directory to write to. If no filename is
                           specified, the program name and suffix will be used
-                          to contruct the full path relative to the directory.
+                          to construct the full path relative to the directory.
 
         :param suffix: The log file name suffix. This will be only used if no
                        filename has been provided.
@@ -179,7 +179,7 @@ class TimedRotatingFile(Output):
 
         :param directory: The log directory to write to. If no filename is
                           specified, the program name and suffix will be used
-                          to contruct the full path relative to the directory.
+                          to construct the full path relative to the directory.
 
         :param suffix: The log file name suffix. This will be only used if no
                        filename has been provided.
