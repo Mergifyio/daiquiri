@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "daiquiri"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dynamic = ["version"]
 license = {"text" = "Apache 2.0"}
 description = "Library to configure Python logging easily"
@@ -19,8 +19,6 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -46,7 +44,7 @@ test = ["pytest"]
 systemd = ["systemd-python>=234"]
 
 [tool.black]
-target-version = ['py38', 'py39', 'py310', 'py311', 'py312', 'py313']
+target-version = ['py310', 'py311', 'py312', 'py313']
 
 [tool.mypy]
 files = "daiquiri"
