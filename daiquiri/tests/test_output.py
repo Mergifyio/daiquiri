@@ -11,7 +11,6 @@
 #    under the License.
 import json
 import logging
-import sys
 import syslog
 import typing
 import unittest
@@ -125,10 +124,6 @@ class TestOutput(unittest.TestCase):
                     "message": mock.ANY,
                 },
             }
-            if sys.version_info >= (3, 12):
-                expected_error_1.update({"taskName": None})
-                expected_info_1.update({"taskName": None})
-                expected_error_2.update({"taskName": None})
             try:
                 1 / 0
             except ZeroDivisionError:

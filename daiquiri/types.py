@@ -1,3 +1,4 @@
+# flake8: noqa: A005
 import logging
 import typing
 
