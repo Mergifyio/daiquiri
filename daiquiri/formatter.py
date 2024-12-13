@@ -14,7 +14,7 @@
 import logging
 import typing
 
-from pythonjsonlogger import jsonlogger
+from pythonjsonlogger import json as jsonlogger
 
 from daiquiri import types
 
@@ -157,7 +157,7 @@ class ColorExtrasFormatter(ColorFormatter, ExtrasFormatter):
         return s
 
 
-class DatadogFormatter(jsonlogger.JsonFormatter):  # type: ignore[misc]
+class DatadogFormatter(jsonlogger.JsonFormatter):
     def __init__(self) -> None:
         super(DatadogFormatter, self).__init__(timestamp=True)
 
