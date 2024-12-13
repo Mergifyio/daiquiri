@@ -12,7 +12,6 @@
 import io
 import json
 import logging
-import sys
 import typing
 import unittest
 import warnings
@@ -42,8 +41,6 @@ class TestDaiquiri(unittest.TestCase):
         )
         daiquiri.getLogger(__name__).warning("foobar")
         expected: dict[str, typing.Any] = {"message": "foobar"}
-        if sys.version_info >= (3, 12):
-            expected.update({"taskName": None})
         self.assertEqual(expected, json.loads(stream.getvalue()))
 
     def test_setup_json_formatter_with_extras(self) -> None:
@@ -57,8 +54,6 @@ class TestDaiquiri(unittest.TestCase):
         )
         daiquiri.getLogger(__name__).warning("foobar", foo="bar")
         expected: dict[str, typing.Any] = {"message": "foobar", "foo": "bar"}
-        if sys.version_info >= (3, 12):
-            expected.update({"taskName": None})
         self.assertEqual(expected, json.loads(stream.getvalue()))
 
     def test_get_logger_set_level(self) -> None:
@@ -72,7 +67,7 @@ class TestDaiquiri(unittest.TestCase):
         line = stream.getvalue()
         self.assertIn("WARNING  py.warnings: ", line)
         self.assertIn(
-            "daiquiri/tests/test_daiquiri.py:71: "
+            "daiquiri/tests/test_daiquiri.py:66: "
             'UserWarning: omg!\n  warnings.warn("omg!")\n',
             line,
         )
