@@ -207,7 +207,7 @@ class TimedRotatingFile(Output):
 
     @staticmethod
     def _timedelta_to_seconds(
-        td: typing.Union[float, int, datetime.timedelta]
+        td: typing.Union[float, int, datetime.timedelta],
     ) -> float:
         """Convert a datetime.timedelta object into a seconds interval.
 

@@ -43,9 +43,6 @@ packages = ["daiquiri"]
 test = ["pytest"]
 systemd = ["systemd-python>=234"]
 
-[tool.black]
-target-version = ['py310', 'py311', 'py312', 'py313']
-
 [tool.mypy]
 files = "daiquiri"
 show_error_codes = true
