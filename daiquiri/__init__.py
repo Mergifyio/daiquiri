@@ -144,7 +144,7 @@ def parse_and_set_default_log_levels(
 def set_default_log_levels(
     loggers_and_log_levels: typing.Iterable[
         typing.Tuple[typing.Optional[str], typing.Union[str, int]]
-    ]
+    ],
 ) -> None:
     """Set default log levels for some loggers.
 
