@@ -71,7 +71,7 @@ class TestColorExtrasFormatter(unittest.TestCase):
         )
 
     def test_keywords_no_extras(self) -> None:
-        format_string = "%(levelname)s %(name)s" " %(test)s%(extras)s: %(message)s"
+        format_string = "%(levelname)s %(name)s %(test)s%(extras)s: %(message)s"
         formatter = daiquiri.formatter.ColorExtrasFormatter(
             fmt=format_string, keywords={"test"}
         )
@@ -81,7 +81,7 @@ class TestColorExtrasFormatter(unittest.TestCase):
         self.assertEqual(self.stream.getvalue(), "INFO my_module a: test message\n")
 
     def test_keywords_with_extras(self) -> None:
-        format_string = "%(levelname)s %(name)s" " %(test)s%(extras)s: %(message)s"
+        format_string = "%(levelname)s %(name)s %(test)s%(extras)s: %(message)s"
         formatter = daiquiri.formatter.ColorExtrasFormatter(
             fmt=format_string, keywords={"test"}
         )

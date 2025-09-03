@@ -12,23 +12,52 @@
 import io
 import json
 import logging
+import sys
+import types
 import typing
 import unittest
 import warnings
 
 import daiquiri
 
+real_excepthook = sys.excepthook
+
 
 class TestDaiquiri(unittest.TestCase):
     def tearDown(self) -> None:
         # Be sure to reset the warning capture
         logging.captureWarnings(False)
+        # Reset exception hook
+        sys.excepthook = real_excepthook
         super(TestDaiquiri, self).tearDown()
 
     def test_setup(self) -> None:
         daiquiri.setup()
         daiquiri.setup(level=logging.DEBUG)
         daiquiri.setup(program_name="foobar")
+
+    def test_excepthook(self) -> None:
+        hook_ran = False
+
+        def catcher(
+            exctype: type[BaseException],
+            value: BaseException,
+            traceback: types.TracebackType | None,
+        ) -> None:
+            nonlocal hook_ran
+            hook_ran = True
+            real_excepthook(exctype, value, traceback)
+
+        sys.excepthook = catcher
+
+        sys.excepthook(Exception, Exception("boom"), None)
+        assert hook_ran
+
+        daiquiri.setup()
+
+        hook_ran = False
+        sys.excepthook(Exception, Exception("boom"), None)
+        assert hook_ran
 
     def test_setup_json_formatter(self) -> None:
         stream = io.StringIO()
@@ -67,7 +96,7 @@ class TestDaiquiri(unittest.TestCase):
         line = stream.getvalue()
         self.assertIn("WARNING  py.warnings: ", line)
         self.assertIn(
-            "daiquiri/tests/test_daiquiri.py:66: "
+            "daiquiri/tests/test_daiquiri.py:95: "
             'UserWarning: omg!\n  warnings.warn("omg!")\n',
             line,
         )

@@ -109,14 +109,17 @@ def setup(
     if set_excepthook:
         program_logger = logging.getLogger(program_name)
 
+        initial_excepthook = staticmethod(sys.excepthook)
+
         def logging_excepthook(
-            exc_type: typing.Optional[typing.Type[BaseException]],
-            value: typing.Optional[BaseException],
+            exc_type: typing.Type[BaseException],
+            value: BaseException,
             tb: typing.Optional[_ptypes.TracebackType],
         ) -> None:
             program_logger.critical(
                 "".join(traceback.format_exception(exc_type, value, tb))
             )
+            initial_excepthook(exc_type, value, tb)
 
         sys.excepthook = logging_excepthook
 
