@@ -13,22 +13,21 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v5.0.0
         with:
           fetch-depth: 0
-          fetch-tags: 'true'
+          fetch-tags: true
 
-      - uses: actions/setup-python@v2.3.1
+      - uses: actions/setup-python@v6.0.0
         with:
           python-version: 3.12
 
       - name: Install build
         run: |
-          python3 -m pip install build
-
-      - name: Build the packages distributions
-        run: |
-          python3 -m build . --wheel --sdist
+          pip install poetry
+          poetry self add poetry-dynamic-versioning[plugin]
+          poetry sync
+          poetry build
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

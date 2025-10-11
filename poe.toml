@@ -1,0 +1,14 @@
+[tool.poe.executor]
+type = "poetry"
+
+[tool.poe.tasks.test]
+cmd = "pytest -v --pyargs daiquiri"
+
+[tool.poe.tasks.linters]
+help = "Run linters"
+default_item_type = "cmd"
+sequence = [
+  "ruff check .",
+  "ruff format --check .",
+  "mypy",
+]
