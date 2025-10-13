@@ -16,32 +16,17 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v5
 
       - name: Setup Python 🔧
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
 
-      - name: Install tox
-        run: pip install tox
-
       - name: Test 🔍
-        run: tox -e py$(echo ${{ matrix.python }} | tr -d .)
-
-  pep8:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v2.4.0
-
-      - name: Setup Python 🔧
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.13"
-
-      - name: Install tox
-        run: pip install tox
-
-      - name: Test 🔍
-        run: tox -e pep8
+        run: |
+          pip install -r requirements-poetry.txt
+          poetry install --sync
+          poetry run poe linters
+          poetry run poe test
+          poetry build

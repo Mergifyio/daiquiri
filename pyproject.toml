@@ -1,9 +1,10 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [project]
 name = "daiquiri"
+version = "0.0.0"
 requires-python = ">=3.10"
 dynamic = ["version"]
 license = {"text" = "Apache 2.0"}
@@ -31,17 +32,17 @@ dependencies = [
 [project.urls]
 homepage = "https://github.com/Mergifyio/daiquiri"
 
-[tool.setuptools_scm]
-
-[tool.setuptools]
-packages = ["daiquiri"]
-
-[tool.setuptools.package-data]
-"daiquiri" = ["py.typed"]
-
 [project.optional-dependencies]
-test = ["pytest"]
 systemd = ["systemd-python>=234"]
+
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+dirty = true
+pattern = "default-unprefixed"
+
+[tool.poe]
+include = ["poe.toml"]
 
 [tool.mypy]
 files = "daiquiri"
@@ -59,3 +60,9 @@ filterwarnings = [
     "error::DeprecationWarning",
 ]
 testpaths = ["daiquiri/tests"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = {version = ">=6.2.5"}
+poethepoet = ">=0.21,<0.38"
+ruff = "^0.14.0"
+mypy = "^1.18.2"
