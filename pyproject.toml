@@ -63,6 +63,6 @@ testpaths = ["daiquiri/tests"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = {version = ">=6.2.5"}
-poethepoet = ">=0.21,<0.38"
+poethepoet = ">=0.21,<0.41"
 ruff = "^0.14.0"
 mypy = "^1.18.2"
