@@ -23,10 +23,11 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
+      - uses: astral-sh/setup-uv@v6
+
       - name: Test 🔍
         run: |
-          pip install -r requirements-poetry.txt
-          poetry install --sync
-          poetry run poe linters
-          poetry run poe test
-          poetry build
+          uv sync
+          uv run poe linters
+          uv run poe test
+          uv build
