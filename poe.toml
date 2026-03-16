@@ -1,5 +1,5 @@
 [tool.poe.executor]
-type = "poetry"
+type = "simple"
 
 [tool.poe.tasks.test]
 cmd = "pytest -v --pyargs daiquiri"

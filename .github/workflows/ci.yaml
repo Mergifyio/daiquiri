@@ -17,6 +17,9 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Setup Python 🔧
         uses: actions/setup-python@v6.2.0
@@ -25,8 +28,8 @@ jobs:
 
       - name: Test 🔍
         run: |
-          pip install -r requirements-poetry.txt
-          poetry install --sync
-          poetry run poe linters
-          poetry run poe test
-          poetry build
+          pip install -r requirements-uv.txt
+          uv sync
+          uv run poe linters
+          uv run poe test
+          uv build
