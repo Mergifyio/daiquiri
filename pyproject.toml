@@ -1,10 +1,9 @@
 [build-system]
-requires = ["poetry-core", "poetry-dynamic-versioning"]
-build-backend = "poetry_dynamic_versioning.backend"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "daiquiri"
-version = "0.0.0"
 requires-python = ">=3.10"
 dynamic = ["version"]
 license = {"text" = "Apache 2.0"}
@@ -33,13 +32,11 @@ dependencies = [
 homepage = "https://github.com/Mergifyio/daiquiri"
 
 [project.optional-dependencies]
-systemd = ["systemd-python>=234"]
+systemd = ["systemd-python>=234; sys_platform == 'linux'"]
 
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-dirty = true
-pattern = "default-unprefixed"
+[tool.hatch.version]
+source = "vcs"
+raw-options.tag_regex = "^(?P<version>\\d+(?:\\.\\d+)*)$"
 
 [tool.poe]
 include = ["poe.toml"]
@@ -61,8 +58,18 @@ filterwarnings = [
 ]
 testpaths = ["daiquiri/tests"]
 
-[tool.poetry.group.dev.dependencies]
-pytest = {version = ">=6.2.5"}
-poethepoet = ">=0.21,<0.42"
-ruff = "^0.15.6"
-mypy = "^1.18.2"
+[tool.uv]
+# systemd-python is a C extension that requires libsystemd to build;
+# provide its metadata so uv can lock without building it.
+[[tool.uv.dependency-metadata]]
+name = "systemd-python"
+version = "235"
+requires-dist = []
+
+[dependency-groups]
+dev = [
+    "pytest>=6.2.5",
+    "poethepoet>=0.21,<0.42",
+    "ruff>=0.15.6",
+    "mypy>=1.18.2",
+]

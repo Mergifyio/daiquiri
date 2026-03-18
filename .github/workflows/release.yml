@@ -22,12 +22,10 @@ jobs:
         with:
           python-version: 3.12
 
-      - name: Install build
+      - name: Build
         run: |
-          pip install poetry
-          poetry self add poetry-dynamic-versioning[plugin]
-          poetry sync
-          poetry build
+          pip install -r requirements-uv.txt
+          uv build
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

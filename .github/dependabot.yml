@@ -1,5 +1,12 @@
 version: 2
 updates:
+  - package-ecosystem: uv
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "09:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 10
   - package-ecosystem: pip
     directory: "/"
     schedule:
