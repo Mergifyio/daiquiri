@@ -14,3 +14,4 @@ queue_rules:
       - "check-success=test (3.11)"
       - "check-success=test (3.12)"
       - "check-success=test (3.13)"
+      - "check-success=test (3.14)"
