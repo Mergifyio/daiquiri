@@ -15,3 +15,5 @@ queue_rules:
       - "check-success=test (3.12)"
       - "check-success=test (3.13)"
       - "check-success=test (3.14)"
+merge_protections_settings:
+  reporting_method: check-runs
