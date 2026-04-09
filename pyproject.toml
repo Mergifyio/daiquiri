@@ -70,7 +70,7 @@ requires-dist = []
 [dependency-groups]
 dev = [
     "pytest>=6.2.5",
-    "poethepoet>=0.21,<0.43",
+    "poethepoet>=0.21,<0.45",
     "ruff>=0.15.6",
     "mypy>=1.18.2",
 ]
