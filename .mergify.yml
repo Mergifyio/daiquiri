@@ -7,7 +7,6 @@ pull_request_rules:
 
 queue_rules:
   - name: default
-    autoqueue: true
     queue_conditions:
       - "#approved-reviews-by>=1"
       - "check-success=test (3.10)"
@@ -17,3 +16,4 @@ queue_rules:
       - "check-success=test (3.14)"
 merge_protections_settings:
   reporting_method: check-runs
+  auto_merge_conditions: true
