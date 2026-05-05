@@ -8,7 +8,7 @@ pull_request_rules:
 merge_protections:
   - name: Reviews
     if:
-      author != dependabot[bot]
+      - author != dependabot[bot]
     success_conditions:
       - "#approved-reviews-by>=1"
 
