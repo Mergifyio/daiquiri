@@ -5,15 +5,22 @@ pull_request_rules:
       dismiss_reviews: {}
 
 
-queue_rules:
-  - name: default
-    queue_conditions:
+merge_protections:
+  - name: Reviews
+    if:
+      author != dependabot[bot]
+    success_conditions:
       - "#approved-reviews-by>=1"
+
+  - name: CI
+    if: []
+    success_conditions:
       - "check-success=test (3.10)"
       - "check-success=test (3.11)"
       - "check-success=test (3.12)"
       - "check-success=test (3.13)"
       - "check-success=test (3.14)"
+
 merge_protections_settings:
-  reporting_method: check-runs
+  reporting_method: deployments
   auto_merge_conditions: true
