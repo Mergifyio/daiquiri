@@ -18,7 +18,6 @@ from pythonjsonlogger import json as jsonlogger
 
 from daiquiri import types
 
-
 DEFAULT_FORMAT = (
     "%(asctime)s [%(process)d] %(color)s%(levelname)-8.8s "
     "%(name)s: %(message)s%(color_stop)s"
@@ -34,10 +33,10 @@ class ColorFormatter(logging.Formatter):
     """Colorizes log output."""
 
     # TODO(jd) Allow configuration
-    LEVEL_COLORS = {
+    LEVEL_COLORS: typing.ClassVar[dict[int, str]] = {
         logging.DEBUG: "\033[00;32m",  # GREEN
         logging.INFO: "\033[00;36m",  # CYAN
-        logging.WARN: "\033[01;33m",  # BOLD YELLOW
+        logging.WARNING: "\033[01;33m",  # BOLD YELLOW
         logging.ERROR: "\033[01;31m",  # BOLD RED
         logging.CRITICAL: "\033[01;31m",  # BOLD RED
     }
@@ -62,7 +61,7 @@ class ColorFormatter(logging.Formatter):
         """Format a record."""
         record = typing.cast(types.ColoredLogRecord, record)
         self.add_color(record)
-        s = super(ColorFormatter, self).format(record)
+        s = super().format(record)
         self.remove_color(record)
         return s
 
@@ -106,7 +105,7 @@ class ExtrasFormatter(logging.Formatter):
 
     def __init__(
         self,
-        keywords: typing.Optional[typing.Set[str]] = None,
+        keywords: set[str] | None = None,
         extras_template: str = "[{0}: {1}]",
         extras_separator: str = " ",
         extras_prefix: str = " ",
@@ -119,7 +118,7 @@ class ExtrasFormatter(logging.Formatter):
         self.extras_separator = extras_separator
         self.extras_prefix = extras_prefix
         self.extras_suffix = extras_suffix
-        super(ExtrasFormatter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def add_extras(self, record: types.ExtrasLogRecord) -> None:
         if not hasattr(record, "_daiquiri_extra_keys"):
@@ -141,7 +140,7 @@ class ExtrasFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         record = typing.cast(types.ExtrasLogRecord, record)
         self.add_extras(record)
-        s = super(ExtrasFormatter, self).format(record)
+        s = super().format(record)
         self.remove_extras(record)
         return s
 
@@ -159,15 +158,15 @@ class ColorExtrasFormatter(ColorFormatter, ExtrasFormatter):
 
 class DatadogFormatter(jsonlogger.JsonFormatter):
     def __init__(self) -> None:
-        super(DatadogFormatter, self).__init__(timestamp=True)
+        super().__init__(timestamp=True)
 
     def add_fields(
         self,
-        log_record: typing.Dict[str, typing.Any],
+        log_record: dict[str, typing.Any],
         record: logging.LogRecord,
-        message_dict: typing.Dict[str, str],
+        message_dict: dict[str, str],
     ) -> None:
-        super(DatadogFormatter, self).add_fields(log_record, record, message_dict)
+        super().add_fields(log_record, record, message_dict)
         log_record["status"] = record.levelname.lower()
         log_record["logger"] = {
             "name": record.name,

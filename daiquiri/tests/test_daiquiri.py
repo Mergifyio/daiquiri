@@ -29,7 +29,7 @@ class TestDaiquiri(unittest.TestCase):
         logging.captureWarnings(False)
         # Reset exception hook
         sys.excepthook = real_excepthook
-        super(TestDaiquiri, self).tearDown()
+        super().tearDown()
 
     def test_setup(self) -> None:
         daiquiri.setup()
