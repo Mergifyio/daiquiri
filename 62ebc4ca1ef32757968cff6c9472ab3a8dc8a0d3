@@ -1,0 +1,6 @@
+Revision history for #253:
+
+rev 2 (rebase) 2026-08-07 05:13 UTC — No code change. Re-push to force a fresh CI run: the previous run (31123494149) was wedged by the 2026-08-06 GitHub Actions outage — stuck 'queued' with zero jobs for 13h, and unrecoverable (GitHub refused both cancel, 'already completed', and rerun, 'already running'). Tree is byte-identical to 2daf932.
+rev 1 (initial) 2026-08-07 05:13 UTC
+
+<!-- mergify-revision-data: {"schema_version":1,"pull_number":253,"entries":[{"number":1,"change_type":"initial","old_sha":null,"new_sha":"2daf932ed4cc1b4c15ec907e43b7b1ffa480427d","timestamp_iso":"2026-08-07T05:13:04Z","reason":"","replay_sha":null,"compare_url":null},{"number":2,"change_type":"rebase","old_sha":"2daf932ed4cc1b4c15ec907e43b7b1ffa480427d","new_sha":"132ff48ab1d94087f20558737a5b237b1a323a34","timestamp_iso":"2026-08-07T05:13:04Z","reason":"No code change. Re-push to force a fresh CI run: the previous run (31123494149) was wedged by the 2026-08-06 GitHub Actions outage — stuck 'queued' with zero jobs for 13h, and unrecoverable (GitHub refused both cancel, 'already completed', and rerun, 'already running'). Tree is byte-identical to 2daf932.","replay_sha":null,"compare_url":"https://github.com/Mergifyio/daiquiri/compare/2daf932ed4cc1b4c15ec907e43b7b1ffa480427d...132ff48ab1d94087f20558737a5b237b1a323a34"}]} -->
