@@ -43,7 +43,7 @@ class KeywordArgumentAdapter(_KeywordArgumentAdapterBase):
 
     def process(
         self, msg: typing.Any, kwargs: "collections.abc.MutableMapping[str, typing.Any]"
-    ) -> typing.Tuple[typing.Any, "collections.abc.MutableMapping[str, typing.Any]"]:
+    ) -> tuple[typing.Any, "collections.abc.MutableMapping[str, typing.Any]"]:
         # Make a new extra dictionary combining the values we were
         # given when we were constructed and anything from kwargs.
         if self.extra is not None:
@@ -61,9 +61,7 @@ class KeywordArgumentAdapter(_KeywordArgumentAdapterBase):
         return msg, kwargs
 
 
-def getLogger(
-    name: typing.Optional[str] = None, **kwargs: typing.Any
-) -> KeywordArgumentAdapter:
+def getLogger(name: str | None = None, **kwargs: typing.Any) -> KeywordArgumentAdapter:
     """Build a logger with the given name.
 
     :param name: The name for the logger. This is usually the module
@@ -74,9 +72,9 @@ def getLogger(
 
 
 def setup(
-    level: typing.Union[int, str] = logging.WARNING,
-    outputs: typing.Iterable[typing.Union[output.Output, str]] = [output.STDERR],
-    program_name: typing.Optional[str] = None,
+    level: int | str = logging.WARNING,
+    outputs: typing.Iterable[output.Output | str] = [output.STDERR],
+    program_name: str | None = None,
     capture_warnings: bool = True,
     set_excepthook: bool = True,
 ) -> None:
@@ -99,7 +97,7 @@ def setup(
     for out in outputs:
         if isinstance(out, str):
             if out not in output.preconfigured:
-                raise RuntimeError("Output {} is not available".format(out))
+                raise RuntimeError(f"Output {out} is not available")
             out = output.preconfigured[out]
 
         out.add_to_logger(root_logger)
@@ -112,9 +110,9 @@ def setup(
         initial_excepthook = staticmethod(sys.excepthook)
 
         def logging_excepthook(
-            exc_type: typing.Type[BaseException],
+            exc_type: type[BaseException],
             value: BaseException,
-            tb: typing.Optional[_ptypes.TracebackType],
+            tb: _ptypes.TracebackType | None,
         ) -> None:
             program_logger.critical(
                 "".join(traceback.format_exception(exc_type, value, tb))
@@ -139,15 +137,13 @@ def parse_and_set_default_log_levels(
     for pair in default_log_levels:
         result = pair.split(separator, 1)
         if len(result) != 2:
-            raise ValueError("Wrong log level format: `%s`" % result)
-        levels.append(typing.cast(typing.Tuple[str, str], tuple(result)))
+            raise ValueError(f"Wrong log level format: `{result}`")
+        levels.append(typing.cast(tuple[str, str], tuple(result)))
     return set_default_log_levels(levels)
 
 
 def set_default_log_levels(
-    loggers_and_log_levels: typing.Iterable[
-        typing.Tuple[typing.Optional[str], typing.Union[str, int]]
-    ],
+    loggers_and_log_levels: typing.Iterable[tuple[str | None, str | int]],
 ) -> None:
     """Set default log levels for some loggers.
 

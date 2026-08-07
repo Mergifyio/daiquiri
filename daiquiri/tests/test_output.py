@@ -21,11 +21,15 @@ import daiquiri
 from daiquiri import output
 
 
-class DatadogMatcher(object):
+class DatadogMatcher:
     def __init__(self, expected: typing.Any) -> None:
         self.expected = expected
 
-    def __eq__(self, other: typing.Any) -> bool:
+    def __eq__(self, other: object) -> bool:
+        # The matcher is only ever compared to the payload handed to
+        # socket.sendall(), i.e. a JSON line as bytes.
+        if not isinstance(other, bytes):
+            return NotImplemented
         return bool(json.loads(other.decode()[:-1]) == self.expected)
 
     def __repr__(self) -> str:
@@ -125,7 +129,9 @@ class TestOutput(unittest.TestCase):
                 },
             }
             try:
-                1 / 0
+                # The useless expression is the point: it is the cheapest way
+                # to get a real traceback for logger.exception() to render.
+                1 / 0  # noqa: B018
             except ZeroDivisionError:
                 logger = daiquiri.getLogger("saymyname")
                 logger.exception("backtrace")

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -47,15 +46,13 @@ SYSLOG_MAP = {
 class SyslogHandler(logging.Handler):
     """Syslog based handler. Only available on UNIX-like platforms."""
 
-    def __init__(
-        self, program_name: str, facility: typing.Optional[int] = None
-    ) -> None:
+    def __init__(self, program_name: str, facility: int | None = None) -> None:
         # Default values always get evaluated, for which reason we avoid
         # using 'syslog' directly, which may not be available.
         facility = facility if facility is not None else syslog.LOG_USER
         if not syslog:
             raise RuntimeError("Syslog not available on this platform")
-        super(SyslogHandler, self).__init__()
+        super().__init__()
         syslog.openlog(program_name, 0, facility)
 
     def emit(self, record: logging.LogRecord) -> None:
@@ -72,7 +69,7 @@ class JournalHandler(logging.Handler):
     def __init__(self, program_name: str) -> None:
         if not journal:
             raise RuntimeError("Systemd bindings do not exist")
-        super(JournalHandler, self).__init__()
+        super().__init__()
         self.program_name = program_name
 
     def emit(self, record: logging.LogRecord) -> None:
@@ -125,7 +122,7 @@ class TTYDetectorStreamHandler(_TTYDetectorStreamHandlerBase):
                 record._stream_is_a_tty = False
         else:
             record._stream_is_a_tty = False
-        s = super(TTYDetectorStreamHandler, self).format(record)
+        s = super().format(record)
         del record._stream_is_a_tty
         return s
 
@@ -135,7 +132,7 @@ class PlainTextSocketHandler(logging.handlers.SocketHandler):
 
     def __init__(self, hostname: str, port: int, encoding: str = "utf-8") -> None:
         self.encoding = encoding
-        super(PlainTextSocketHandler, self).__init__(hostname, port)
+        super().__init__(hostname, port)
 
     def makePickle(self, record: logging.LogRecord) -> bytes:
         return self.format(record).encode(self.encoding) + b"\n"
@@ -146,7 +143,7 @@ class PlainTextDatagramHandler(logging.handlers.DatagramHandler):
 
     def __init__(self, hostname: str, port: int, encoding: str = "utf-8") -> None:
         self.encoding = encoding
-        super(PlainTextDatagramHandler, self).__init__(hostname, port)
+        super().__init__(hostname, port)
 
     def makePickle(self, record: logging.LogRecord) -> bytes:
         return self.format(record).encode(self.encoding) + b"\n"

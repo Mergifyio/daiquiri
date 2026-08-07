@@ -1,5 +1,4 @@
 import logging
-import typing
 
 
 class ColoredLogRecord(logging.LogRecord):
@@ -11,7 +10,7 @@ class ExtrasLogRecord(logging.LogRecord):
     extras_prefix: str
     extras_suffix: str
     extras: str
-    _daiquiri_extra_keys: typing.Set[str]
+    _daiquiri_extra_keys: set[str]
 
 
 class TTYDetectionLogRecord(logging.LogRecord):

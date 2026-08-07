@@ -42,6 +42,12 @@ raw-options.tag_regex = "^(?P<version>\\d+(?:\\.\\d+)*)$"
 [tool.poe]
 include = ["poe.toml"]
 
+[tool.ruff.lint.per-file-ignores]
+# The examples are deliberately minimal: raising a bare Exception (TRY002) is
+# how you show an exception escaping to the excepthook without inventing an
+# exception class that has nothing to do with what the snippet demonstrates.
+"examples/*" = ["TRY002"]
+
 [tool.mypy]
 files = "daiquiri"
 show_error_codes = true
@@ -71,6 +77,6 @@ requires-dist = []
 dev = [
     "pytest>=6.2.5",
     "poethepoet>=0.21,<0.49",
-    "ruff>=0.15.6",
+    "ruff>=0.16",
     "mypy>=1.18.2",
 ]

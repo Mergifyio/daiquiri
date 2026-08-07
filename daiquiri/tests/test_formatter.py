@@ -28,7 +28,7 @@ class TestColorExtrasFormatter(unittest.TestCase):
         cls.stream = io.StringIO()
         cls.handler = daiquiri.handlers.TTYDetectorStreamHandler(cls.stream)
         cls.logger.logger.addHandler(cls.handler)
-        super(TestColorExtrasFormatter, cls).setUpClass()
+        super().setUpClass()
 
     def setUp(self) -> None:
         # Couldn't get readline() to return anything no matter what I tried, so
@@ -37,7 +37,7 @@ class TestColorExtrasFormatter(unittest.TestCase):
         self.stream.close()
         self.stream = io.StringIO()
         self.handler.stream = self.stream
-        super(TestColorExtrasFormatter, self).setUp()
+        super().setUp()
 
     def test_no_keywords(self) -> None:
         format_string = "%(levelname)s %(name)s%(extras)s: %(message)s"

@@ -22,8 +22,7 @@ try:
 except ImportError:
     syslog = None  # type: ignore[assignment]
 
-from daiquiri import formatter
-from daiquiri import handlers
+from daiquiri import formatter, handlers
 
 
 def get_program_name() -> str:
@@ -38,7 +37,7 @@ class Output:
         self,
         handler: logging.Handler,
         formatter: logging.Formatter = formatter.TEXT_FORMATTER,
-        level: typing.Optional[int] = None,
+        level: int | None = None,
     ):
         self.handler = handler
         self.handler.setFormatter(formatter)
@@ -51,9 +50,9 @@ class Output:
 
 
 def _get_log_file_path(
-    logfile: typing.Optional[str] = None,
-    logdir: typing.Optional[str] = None,
-    program_name: typing.Optional[str] = None,
+    logfile: str | None = None,
+    logdir: str | None = None,
+    program_name: str | None = None,
     logfile_suffix: str = ".log",
 ) -> str:
     ret_path = None
@@ -79,12 +78,12 @@ class File(Output):
 
     def __init__(
         self,
-        filename: typing.Optional[str] = None,
-        directory: typing.Optional[str] = None,
+        filename: str | None = None,
+        directory: str | None = None,
         suffix: str = ".log",
-        program_name: typing.Optional[str] = None,
+        program_name: str | None = None,
         formatter: logging.Formatter = formatter.TEXT_FORMATTER,
-        level: typing.Optional[int] = None,
+        level: int | None = None,
     ):
         """Log file output.
 
@@ -103,7 +102,7 @@ class File(Output):
         """
         logpath = _get_log_file_path(filename, directory, program_name, suffix)
         handler = logging.handlers.WatchedFileHandler(logpath)
-        super(File, self).__init__(handler, formatter, level)
+        super().__init__(handler, formatter, level)
 
 
 class RotatingFile(Output):
@@ -113,12 +112,12 @@ class RotatingFile(Output):
 
     def __init__(
         self,
-        filename: typing.Optional[str] = None,
-        directory: typing.Optional[str] = None,
+        filename: str | None = None,
+        directory: str | None = None,
         suffix: str = ".log",
-        program_name: typing.Optional[str] = None,
+        program_name: str | None = None,
         formatter: logging.Formatter = formatter.TEXT_FORMATTER,
-        level: typing.Optional[int] = None,
+        level: int | None = None,
         max_size_bytes: int = 0,
         backup_count: int = 0,
     ):
@@ -147,7 +146,7 @@ class RotatingFile(Output):
         handler = logging.handlers.RotatingFileHandler(
             logpath, maxBytes=max_size_bytes, backupCount=backup_count
         )
-        super(RotatingFile, self).__init__(handler, formatter, level)
+        super().__init__(handler, formatter, level)
 
     def do_rollover(self) -> None:
         """Manually forces a log file rotation."""
@@ -161,15 +160,13 @@ class TimedRotatingFile(Output):
 
     def __init__(
         self,
-        filename: typing.Optional[str] = None,
-        directory: typing.Optional[str] = None,
+        filename: str | None = None,
+        directory: str | None = None,
         suffix: str = ".log",
-        program_name: typing.Optional[str] = None,
+        program_name: str | None = None,
         formatter: logging.Formatter = formatter.TEXT_FORMATTER,
-        level: typing.Optional[int] = None,
-        interval: typing.Union[float, int, datetime.timedelta] = datetime.timedelta(
-            hours=24
-        ),
+        level: int | None = None,
+        interval: float | datetime.timedelta = datetime.timedelta(hours=24),
         backup_count: int = 0,
     ):
         """Rotating log file output, triggered by a fixed interval.
@@ -199,7 +196,7 @@ class TimedRotatingFile(Output):
             interval=int(self._timedelta_to_seconds(interval)),
             backupCount=backup_count,
         )
-        super(TimedRotatingFile, self).__init__(handler, formatter, level)
+        super().__init__(handler, formatter, level)
 
     def do_rollover(self) -> None:
         """Manually forces a log file rotation."""
@@ -207,7 +204,7 @@ class TimedRotatingFile(Output):
 
     @staticmethod
     def _timedelta_to_seconds(
-        td: typing.Union[float, int, datetime.timedelta],
+        td: float | datetime.timedelta,
     ) -> float:
         """Convert a datetime.timedelta object into a seconds interval.
 
@@ -227,11 +224,9 @@ class Stream(Output):
         self,
         stream: typing.TextIO = sys.stderr,
         formatter: logging.Formatter = formatter.TEXT_FORMATTER,
-        level: typing.Optional[int] = None,
+        level: int | None = None,
     ) -> None:
-        super(Stream, self).__init__(
-            handlers.TTYDetectorStreamHandler(stream), formatter, level
-        )
+        super().__init__(handlers.TTYDetectorStreamHandler(stream), formatter, level)
 
 
 STDERR = Stream()
@@ -241,28 +236,26 @@ STDOUT = Stream(sys.stdout)
 class Journal(Output):
     def __init__(
         self,
-        program_name: typing.Optional[str] = None,
+        program_name: str | None = None,
         formatter: logging.Formatter = formatter.TEXT_FORMATTER,
-        level: typing.Optional[int] = None,
+        level: int | None = None,
     ) -> None:
         program_name = program_name or get_program_name()
-        super(Journal, self).__init__(
-            handlers.JournalHandler(program_name), formatter, level
-        )
+        super().__init__(handlers.JournalHandler(program_name), formatter, level)
 
 
 class Syslog(Output):
     def __init__(
         self,
-        program_name: typing.Optional[str] = None,
+        program_name: str | None = None,
         facility: str = "user",
         formatter: logging.Formatter = formatter.TEXT_FORMATTER,
-        level: typing.Optional[int] = None,
+        level: int | None = None,
     ) -> None:
         if syslog is None:
             # FIXME(jd) raise something more specific
             raise RuntimeError("syslog is not available on this platform")
-        super(Syslog, self).__init__(
+        super().__init__(
             handlers.SyslogHandler(
                 program_name=program_name or get_program_name(),
                 facility=self._find_facility(facility),
@@ -308,10 +301,8 @@ class Syslog(Output):
             facility = "LOG_" + facility
 
         if facility not in valid_facilities:
-            raise TypeError(
-                "syslog facility must be one of: %s"
-                % ", ".join("'%s'" % fac for fac in valid_facilities)
-            )
+            choices = ", ".join(f"'{fac}'" for fac in valid_facilities)
+            raise TypeError(f"syslog facility must be one of: {choices}")
 
         return int(getattr(syslog, facility))
 
@@ -322,12 +313,12 @@ class Datadog(Output):
         hostname: str = "127.0.0.1",
         port: int = 10518,
         formatter: logging.Formatter = formatter.DATADOG_FORMATTER,
-        level: typing.Optional[int] = None,
-        handler_class: typing.Type[
+        level: int | None = None,
+        handler_class: type[
             logging.handlers.SocketHandler
         ] = handlers.PlainTextSocketHandler,
     ):
-        super(Datadog, self).__init__(
+        super().__init__(
             handler_class(hostname, port),
             formatter=formatter,
             level=level,
@@ -335,7 +326,7 @@ class Datadog(Output):
 
 
 # FIXME(jd): Is this useful? Remove it?
-preconfigured: typing.Dict[str, typing.Union[Stream, Output]] = {
+preconfigured: dict[str, Stream | Output] = {
     "stderr": STDERR,
     "stdout": STDOUT,
 }
