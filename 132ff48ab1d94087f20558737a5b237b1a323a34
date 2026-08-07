@@ -1,0 +1,1 @@
+No code change. Re-push to force a fresh CI run: the previous run (31123494149) was wedged by the 2026-08-06 GitHub Actions outage — stuck 'queued' with zero jobs for 13h, and unrecoverable (GitHub refused both cancel, 'already completed', and rerun, 'already running'). Tree is byte-identical to 2daf932.
