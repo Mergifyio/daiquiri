@@ -70,6 +70,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+colorama = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+]
 systemd = [
     { name = "systemd-python", marker = "sys_platform == 'linux'" },
 ]
@@ -84,10 +87,11 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "colorama", marker = "sys_platform == 'win32' and extra == 'colorama'", specifier = ">=0.4.6" },
     { name = "python-json-logger", specifier = ">=3" },
     { name = "systemd-python", marker = "sys_platform == 'linux' and extra == 'systemd'", specifier = ">=234" },
 ]
-provides-extras = ["systemd"]
+provides-extras = ["colorama", "systemd"]
 
 [package.metadata.requires-dev]
 dev = [
