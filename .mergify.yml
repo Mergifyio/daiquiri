@@ -20,6 +20,7 @@ merge_protections:
       - "check-success=test (3.12)"
       - "check-success=test (3.13)"
       - "check-success=test (3.14)"
+      - "check-success=test (3.15)"
 
 merge_protections_settings:
   reporting_method: deployments
