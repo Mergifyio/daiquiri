@@ -108,7 +108,15 @@ Systemd journal support
 
 The `daiquiri.output.Journal` output provides systemd journal support. All the
 extra arguments passed to the logger will be shipped as extra keys to the
-journal.
+journal, named after the upper-cased argument name.
+
+Characters that journald does not accept in a field name are replaced with
+`_`. Fields set by the handler itself (`MESSAGE`, `MESSAGE_ID`, `PRIORITY`,
+`SYSLOG_IDENTIFIER`, `CODE_FILE`, `CODE_LINE`, `CODE_FUNC`, `THREAD_NAME`,
+`PROCESS_NAME`, `LOGGER_NAME`, `LOGGER_LEVEL`, `EXCEPTION_TEXT`,
+`EXCEPTION_INFO`) cannot be replaced by an extra argument: such an argument,
+or one whose name starts with `_` or a digit, is shipped with an `EXTRA_`
+prefix instead, e.g. `priority=0` becomes `EXTRA_PRIORITY=0`.
 
 
 File support
