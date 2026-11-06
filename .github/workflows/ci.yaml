@@ -30,8 +30,8 @@ jobs:
 
       - name: Test 🔍
         run: |
-          pip install -r requirements-uv.txt
+          pip install --require-hashes -r requirements-uv.txt
           uv sync
           uv run poe linters
           uv run poe test
-          uv build
+          uv build --build-constraints requirements-build.txt --require-hashes

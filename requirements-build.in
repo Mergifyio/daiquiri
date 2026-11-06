@@ -1,0 +1,5 @@
+# Build backend used by uv build and uv sync (pyproject.toml [build-system]).
+# Regenerate requirements-build.txt with:
+#   uv pip compile requirements-build.in --universal --python-version 3.10 --generate-hashes -o requirements-build.txt
+hatchling
+hatch-vcs
