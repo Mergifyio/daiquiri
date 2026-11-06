@@ -25,8 +25,8 @@ jobs:
 
       - name: Build
         run: |
-          pip install -r requirements-uv.txt
-          uv build
+          pip install --require-hashes -r requirements-uv.txt
+          uv build --build-constraints requirements-build.txt --require-hashes
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
