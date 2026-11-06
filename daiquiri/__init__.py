@@ -96,9 +96,10 @@ def setup(
     # Add configured handlers
     for out in outputs:
         if isinstance(out, str):
-            if out not in output.preconfigured:
-                raise RuntimeError(f"Output {out} is not available")
-            out = output.preconfigured[out]
+            try:
+                out = output.get_preconfigured(out)
+            except KeyError:
+                raise RuntimeError(f"Output {out} is not available") from None
 
         out.add_to_logger(root_logger)
 

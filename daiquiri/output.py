@@ -331,8 +331,22 @@ preconfigured: dict[str, Stream | Output] = {
     "stdout": STDOUT,
 }
 
+# Built on first use rather than at import, so that importing daiquiri does
+# not connect to the local syslog or journal.
+_lazy_preconfigured: dict[str, typing.Callable[[], Output]] = {}
+
 if syslog is not None:
-    preconfigured["syslog"] = Syslog()
+    _lazy_preconfigured["syslog"] = Syslog
 
 if handlers.journal is not None:  # type: ignore[attr-defined]
-    preconfigured["journal"] = Journal()
+    _lazy_preconfigured["journal"] = Journal
+
+
+def get_preconfigured(name: str) -> Stream | Output:
+    """Return the preconfigured output with this name.
+
+    :raises KeyError: if no such output is available on this platform.
+    """
+    if name not in preconfigured and name in _lazy_preconfigured:
+        preconfigured[name] = _lazy_preconfigured[name]()
+    return preconfigured[name]
