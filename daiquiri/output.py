@@ -220,6 +220,8 @@ class TimedRotatingFile(Output):
 class Stream(Output):
     """Generic stream output."""
 
+    handler: handlers.TTYDetectorStreamHandler
+
     def __init__(
         self,
         stream: typing.TextIO = sys.stderr,
