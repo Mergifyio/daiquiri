@@ -102,6 +102,15 @@ Syslog support
 
 The `daiquiri.output.Syslog` output provides syslog output.
 
+Each `Syslog` output sends its messages with its own program name and
+facility, to the local syslog socket (`/dev/log`, `/var/run/syslog` or
+`/var/run/log`, whichever exists first). It does not call `syslog.openlog`,
+so several outputs with different facilities, and the application's own use of
+the `syslog` module, do not interfere with each other.
+
+The preconfigured `"syslog"` and `"journal"` outputs are built the first time
+`daiquiri.setup` is given their name, not when daiquiri is imported.
+
 
 Systemd journal support
 -----------------------
