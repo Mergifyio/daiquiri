@@ -13,6 +13,7 @@
 import logging
 import logging.config
 import logging.handlers
+import re
 import typing
 
 try:
@@ -62,7 +63,37 @@ class SyslogHandler(logging.Handler):
 
 
 class JournalHandler(logging.Handler):
-    """Journald based handler. Only available on platforms using systemd."""
+    """Journald based handler. Only available on platforms using systemd.
+
+    Keyword extras are sent as journal fields named after the upper-cased
+    extra name. Characters that journald does not accept in a field name are
+    replaced with ``_``. An extra whose field name is one the handler sets
+    itself (see :attr:`RESERVED_FIELDS`), or that starts with ``_`` or a
+    digit, is sent with an ``EXTRA_`` prefix instead, so it cannot replace
+    the record's priority, identifier, message or source location.
+    """
+
+    #: Journal fields set by the handler, or by ``journal.send`` arguments,
+    #: that keyword extras are not allowed to replace.
+    RESERVED_FIELDS: typing.ClassVar[frozenset[str]] = frozenset(
+        {
+            "MESSAGE",
+            "MESSAGE_ID",
+            "CODE_FILE",
+            "CODE_LINE",
+            "CODE_FUNC",
+            "THREAD_NAME",
+            "PROCESS_NAME",
+            "LOGGER_NAME",
+            "LOGGER_LEVEL",
+            "SYSLOG_IDENTIFIER",
+            "PRIORITY",
+            "EXCEPTION_TEXT",
+            "EXCEPTION_INFO",
+        }
+    )
+
+    _INVALID_FIELD_CHARS = re.compile(r"[^A-Z0-9_]")
 
     program_name: str
 
@@ -72,35 +103,51 @@ class JournalHandler(logging.Handler):
         super().__init__()
         self.program_name = program_name
 
+    @classmethod
+    def _field_name(cls, extra_name: str) -> str:
+        """Return the journal field name used for a keyword extra."""
+        field = cls._INVALID_FIELD_CHARS.sub("_", extra_name.upper())
+        if (
+            not field
+            or field in cls.RESERVED_FIELDS
+            or field[0] == "_"
+            or field[0].isdigit()
+        ):
+            field = "EXTRA_" + field
+        return field
+
     def emit(self, record: logging.LogRecord) -> None:
-        priority = SYSLOG_MAP.get(record.levelname, 7)
-        message = self.format(record)
+        try:
+            priority = SYSLOG_MAP.get(record.levelname, 7)
+            message = self.format(record)
 
-        extras = {
-            "CODE_FILE": record.pathname,
-            "CODE_LINE": record.lineno,
-            "CODE_FUNC": record.funcName,
-            "THREAD_NAME": record.threadName,
-            "PROCESS_NAME": record.processName,
-            "LOGGER_NAME": record.name,
-            "LOGGER_LEVEL": record.levelname,
-            "SYSLOG_IDENTIFIER": self.program_name,
-            "PRIORITY": priority,
-        }
+            extras = {
+                "CODE_FILE": record.pathname,
+                "CODE_LINE": record.lineno,
+                "CODE_FUNC": record.funcName,
+                "THREAD_NAME": record.threadName,
+                "PROCESS_NAME": record.processName,
+                "LOGGER_NAME": record.name,
+                "LOGGER_LEVEL": record.levelname,
+                "SYSLOG_IDENTIFIER": self.program_name,
+                "PRIORITY": priority,
+            }
 
-        if record.exc_text:
-            extras["EXCEPTION_TEXT"] = record.exc_text
+            if record.exc_text:
+                extras["EXCEPTION_TEXT"] = record.exc_text
 
-        if record.exc_info:
-            extras["EXCEPTION_INFO"] = record.exc_info
+            if record.exc_info:
+                extras["EXCEPTION_INFO"] = record.exc_info
 
-        if hasattr(record, "_daiquiri_extra_keys"):
-            record = typing.cast(types.ExtrasLogRecord, record)
-            for k in record._daiquiri_extra_keys:
-                if k != "_daiquiri_extra_keys":
-                    extras[k.upper()] = getattr(record, k)
+            if hasattr(record, "_daiquiri_extra_keys"):
+                record = typing.cast(types.ExtrasLogRecord, record)
+                for k in record._daiquiri_extra_keys:
+                    if k != "_daiquiri_extra_keys":
+                        extras[self._field_name(k)] = getattr(record, k)
 
-        journal.send(message, **extras)
+            journal.send(message, **extras)
+        except Exception:  # noqa: BLE001 - same contract as logging.Handler.emit
+            self.handleError(record)
 
 
 if typing.TYPE_CHECKING:
