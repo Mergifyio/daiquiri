@@ -11,6 +11,7 @@
 #    under the License.
 """Formatters."""
 
+import copy
 import logging
 import typing
 
@@ -28,8 +29,84 @@ DEFAULT_EXTRAS_FORMAT = (
     "%(name)s%(extras)s: %(message)s%(color_stop)s"
 )
 
+# C0 control characters except tab, DEL and C1 control characters. CR and LF
+# would start a forged log line; ESC (and the 8-bit CSI, 0x9b) would start a
+# terminal escape sequence.
+_CONTROL_CHARS_ESCAPES: dict[int, str] = {
+    c: f"\\x{c:02x}" for c in (*range(0x20), *range(0x7F, 0xA0)) if c != 0x09
+}
+_CONTROL_CHARS_ESCAPES[0x0A] = "\\n"
+_CONTROL_CHARS_ESCAPES[0x0D] = "\\r"
+_CONTROL_CHARS_TABLE = str.maketrans(_CONTROL_CHARS_ESCAPES)
 
-class ColorFormatter(logging.Formatter):
+# Attributes every LogRecord has: set by the logging module from the code
+# location and the process, not from logged values.
+_LOG_RECORD_ATTRIBUTES = frozenset(
+    logging.LogRecord("", 0, "", 0, "", (), None).__dict__
+) | {"message", "asctime"}
+
+# Attributes daiquiri sets itself; color holds the escape sequences that must
+# reach the terminal, and extras is escaped item by item by ExtrasFormatter.
+_DAIQUIRI_ATTRIBUTES = frozenset(
+    {"color", "color_stop", "extras", "_daiquiri_extra_keys", "_stream_is_a_tty"}
+)
+
+
+def _escape(text: str) -> str:
+    return text.translate(_CONTROL_CHARS_TABLE)
+
+
+def _neutralize(value: typing.Any) -> typing.Any:
+    """Return value with control characters escaped from its text form.
+
+    Numbers and None are kept as they are, so that format strings such as
+    %(count)d keep working; other objects are replaced by their escaped
+    string only when that string holds a control character.
+    """
+    if isinstance(value, str):
+        return _escape(value)
+    if value is None or isinstance(value, (bool, int, float)):
+        return value
+    text = str(value)
+    escaped = _escape(text)
+    return value if escaped == text else escaped
+
+
+class _ControlCharsEscapingFormatter(logging.Formatter):
+    """Formatter that can escape control characters from logged values.
+
+    With escape_control_chars=True, CR, LF, ESC and the other control
+    characters (except tab) found in the message, in its arguments and in
+    the extra values of the record are written as escape sequences such as
+    ``\\n`` or ``\\x1b``, so that a logged value cannot start a new log line
+    or send a sequence to the terminal. Tracebacks and stack information
+    are not escaped and stay multi-line.
+    """
+
+    def __init__(
+        self,
+        *args: typing.Any,
+        escape_control_chars: bool = False,
+        **kwargs: typing.Any,
+    ) -> None:
+        self.escape_control_chars = escape_control_chars
+        super().__init__(*args, **kwargs)
+
+    def format(self, record: logging.LogRecord) -> str:
+        if not self.escape_control_chars:
+            return super().format(record)
+        # Work on a copy so that other handlers still see the original values.
+        safe_record = copy.copy(record)
+        safe_record.msg = _escape(record.getMessage())
+        safe_record.args = None
+        for name, value in record.__dict__.items():
+            if name in _LOG_RECORD_ATTRIBUTES or name in _DAIQUIRI_ATTRIBUTES:
+                continue
+            setattr(safe_record, name, _neutralize(value))
+        return super().format(safe_record)
+
+
+class ColorFormatter(_ControlCharsEscapingFormatter):
     """Colorizes log output."""
 
     # TODO(jd) Allow configuration
@@ -66,7 +143,7 @@ class ColorFormatter(logging.Formatter):
         return s
 
 
-class ExtrasFormatter(logging.Formatter):
+class ExtrasFormatter(_ControlCharsEscapingFormatter):
     """Formats extra keywords into %(extras)s placeholder.
 
     Any keywords passed to a logging call will be formatted into a
@@ -101,6 +178,12 @@ class ExtrasFormatter(logging.Formatter):
         Strings which will be prepended and appended to the "extras"
         string respectively. These will only be prepended if the
         "extras" string is not empty.
+
+    escape_control_chars
+        If True, escape CR, LF, ESC and the other control characters
+        (except tab) in the message and in each extra name and value, so
+        that a logged value cannot forge a log line or send a sequence to
+        the terminal. Defaults to False.
     """
 
     def __init__(
@@ -125,8 +208,12 @@ class ExtrasFormatter(logging.Formatter):
             record.extras = ""
             return
 
+        escape = self.escape_control_chars
         extras = self.extras_separator.join(
-            self.extras_template.format(k, getattr(record, k))
+            self.extras_template.format(
+                _escape(k) if escape else k,
+                _neutralize(getattr(record, k)) if escape else getattr(record, k),
+            )
             for k in record._daiquiri_extra_keys
             if k != "_daiquiri_extra_keys" and k not in self.keywords
         )
