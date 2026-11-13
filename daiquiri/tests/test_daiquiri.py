@@ -118,7 +118,7 @@ class TestDaiquiri(unittest.TestCase):
     def test_string_as_setup_outputs_arg(self) -> None:
         daiquiri.setup(outputs=("stderr", "stdout"))
 
-        if daiquiri.handlers.syslog is not None:  # type: ignore[attr-defined]
+        if daiquiri.output.syslog is not None:  # type: ignore[attr-defined]
             daiquiri.setup(outputs=("syslog",))
 
         if daiquiri.handlers.journal is not None:  # type: ignore[attr-defined]
