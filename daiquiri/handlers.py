@@ -13,6 +13,7 @@
 import logging
 import logging.config
 import logging.handlers
+import os
 import typing
 
 try:
@@ -110,18 +111,30 @@ else:
 
 
 class TTYDetectorStreamHandler(_TTYDetectorStreamHandlerBase):
-    """Stream handler that adds a hint in the record if the stream is a TTY."""
+    """Stream handler that adds a hint in the record if colors should be used.
+
+    Colors are used when the stream is a TTY. The ``NO_COLOR`` and
+    ``FORCE_COLOR`` environment variables override this: when ``NO_COLOR`` is
+    set to a non-empty value colors are never used, otherwise when
+    ``FORCE_COLOR`` is set to a non-empty value they are always used.
+    """
+
+    def _use_color(self) -> bool:
+        if os.environ.get("NO_COLOR"):
+            return False
+        if os.environ.get("FORCE_COLOR"):
+            return True
+        if not hasattr(self.stream, "isatty"):
+            return False
+        try:
+            return bool(self.stream.isatty())
+        except ValueError:
+            # Stream has been closed, usually during interpretor shutdown
+            return False
 
     def format(self, record: logging.LogRecord) -> str:
         record = typing.cast(types.TTYDetectionLogRecord, record)
-        if hasattr(self.stream, "isatty"):
-            try:
-                record._stream_is_a_tty = self.stream.isatty()
-            except ValueError:
-                # Stream has been closed, usually during interpretor shutdown
-                record._stream_is_a_tty = False
-        else:
-            record._stream_is_a_tty = False
+        record._stream_is_a_tty = self._use_color()
         s = super().format(record)
         del record._stream_is_a_tty
         return s
