@@ -10,7 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import datetime
-import inspect
 import logging
 import logging.handlers
 import os
@@ -26,8 +25,22 @@ from daiquiri import formatter, handlers
 
 
 def get_program_name() -> str:
-    """Return the name of the running program."""
-    return os.path.basename(inspect.stack()[-1][1])
+    """Return the name of the running program.
+
+    For ``python -m pkg`` this is the module name (``pkg``, also for
+    ``pkg/__main__.py``); otherwise the base name of ``sys.argv[0]``
+    (``script.py``, or the console script name). ``"python"`` is returned
+    when neither is available, e.g. for ``python -c`` or an interactive
+    session. The result does not depend on the calling thread.
+    """
+    main_spec = getattr(sys.modules.get("__main__"), "__spec__", None)
+    module_name: str | None = getattr(main_spec, "name", None)
+    if module_name and module_name != "__main__":
+        return module_name.removesuffix(".__main__")
+    argv: list[str] | None = getattr(sys, "argv", None)
+    if argv and argv[0] not in ("", "-c", "-"):
+        return os.path.basename(argv[0])
+    return "python"
 
 
 class Output:
