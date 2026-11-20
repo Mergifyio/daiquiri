@@ -125,6 +125,33 @@ interval.
 .. literalinclude:: ../../examples/files.py
 
 
+TLS socket output
+-----------------
+
+`daiquiri.handlers.TLSPlainTextSocketHandler` sends records like
+`daiquiri.handlers.PlainTextSocketHandler`, but over TLS. It can be passed as
+the `handler_class` of the `daiquiri.output.Datadog` output, to reach a remote
+Agent through a TLS-terminating proxy::
+
+    daiquiri.setup(outputs=[
+        daiquiri.output.Datadog(
+            hostname="agent-proxy.example.com",
+            port=10518,
+            handler_class=daiquiri.handlers.TLSPlainTextSocketHandler,
+        ),
+    ])
+
+It verifies the server certificate and host name against the system's trusted
+certificate authorities. To trust your own authority, subclass it and set
+`ssl_context`::
+
+    class MyTLSHandler(daiquiri.handlers.TLSPlainTextSocketHandler):
+        ssl_context = ssl.create_default_context(cafile="/etc/ssl/my-ca.pem")
+
+If the TLS handshake fails, nothing is sent and the connection is retried
+later; it never falls back to plain TCP.
+
+
 Excepthook Integration
 ----------------------
 
