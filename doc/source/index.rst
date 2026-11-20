@@ -111,6 +111,24 @@ extra arguments passed to the logger will be shipped as extra keys to the
 journal.
 
 
+Datadog support
+---------------
+
+The `daiquiri.output.Datadog` output sends each log record, formatted as JSON
+by `daiquiri.formatter.DATADOG_FORMATTER` and ended by a newline, to a Datadog
+Agent listening on TCP. By default it connects to `127.0.0.1` on port `10518`:
+the Agent must have a matching custom log source (`type: tcp`, `port: 10518`
+in a `conf.yaml`; see Datadog's "Host Agent Log collection" documentation).
+
+The transport is **not encrypted**: if you point the output at an Agent on
+another host, every log record, including tracebacks and extra values,
+crosses the network in clear and can be read or altered on the way. Keep the
+Agent on the same host when you can. The Agent's TCP listener does not
+document a TLS option; reaching a remote Agent safely requires a TLS-capable
+socket handler, passed as `handler_class`, and a TLS-terminating proxy in
+front of the Agent.
+
+
 File support
 ------------
 
