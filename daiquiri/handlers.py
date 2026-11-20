@@ -13,18 +13,13 @@
 import logging
 import logging.config
 import logging.handlers
+import os
 import typing
 
 try:
     from systemd import journal
 except ImportError:
     journal = None
-
-
-try:
-    import syslog
-except ImportError:
-    syslog = None  # type: ignore[assignment]
 
 
 from daiquiri import types
@@ -43,22 +38,61 @@ SYSLOG_MAP = {
 }
 
 
-class SyslogHandler(logging.Handler):
-    """Syslog based handler. Only available on UNIX-like platforms."""
+_SYSLOG_PRIORITY_NAMES = {
+    2: "crit",
+    3: "err",
+    4: "warning",
+    6: "info",
+    7: "debug",
+}
 
-    def __init__(self, program_name: str, facility: int | None = None) -> None:
-        # Default values always get evaluated, for which reason we avoid
-        # using 'syslog' directly, which may not be available.
-        facility = facility if facility is not None else syslog.LOG_USER
-        if not syslog:
-            raise RuntimeError("Syslog not available on this platform")
-        super().__init__()
-        syslog.openlog(program_name, 0, facility)
+# Local syslog sockets: Linux, macOS, FreeBSD.
+_SYSLOG_SOCKETS = ("/dev/log", "/var/run/syslog", "/var/run/log")
 
-    def emit(self, record: logging.LogRecord) -> None:
-        priority = SYSLOG_MAP.get(record.levelname, 7)
-        message = self.format(record)
-        syslog.syslog(priority, message)
+# LOG_USER as the syslog module defines it: facilities there are shifted by 3
+# bits, unlike logging.handlers.SysLogHandler's.
+_SYSLOG_LOG_USER = logging.handlers.SysLogHandler.LOG_USER << 3
+
+
+def _default_syslog_address() -> str | tuple[str, int]:
+    for path in _SYSLOG_SOCKETS:
+        if os.path.exists(path):
+            return path
+    return ("localhost", logging.handlers.SYSLOG_UDP_PORT)
+
+
+class SyslogHandler(logging.handlers.SysLogHandler):
+    """Syslog based handler.
+
+    Each handler sends its messages with its own program name and facility:
+    unlike syslog.openlog, nothing process-wide is changed, so several
+    handlers with different facilities, and the application's own use of
+    the syslog module, do not interfere.
+
+    :param program_name: The identity prepended to each message.
+    :param facility: A facility as defined by the syslog module, such as
+                     syslog.LOG_AUTH. Defaults to LOG_USER.
+    :param address: Where to send the messages: the path of a Unix socket or
+                    a (host, port) tuple for UDP. Defaults to the first local
+                    syslog socket found (/dev/log, /var/run/syslog,
+                    /var/run/log), else localhost on UDP port 514.
+    """
+
+    def __init__(
+        self,
+        program_name: str,
+        facility: int | None = None,
+        address: str | tuple[str, int] | None = None,
+    ) -> None:
+        self.syslog_facility = facility if facility is not None else _SYSLOG_LOG_USER
+        super().__init__(
+            address=address if address is not None else _default_syslog_address(),
+            facility=self.syslog_facility >> 3,
+        )
+        self.ident = f"{program_name}: "
+
+    def mapPriority(self, levelName: str) -> str:
+        return _SYSLOG_PRIORITY_NAMES[SYSLOG_MAP.get(levelName, 7)]
 
 
 class JournalHandler(logging.Handler):
