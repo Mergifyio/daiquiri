@@ -32,6 +32,12 @@ setup logging with the options passed as keyword arguments. If no arguments are
 passed, the default will log to `stderr`. If `stderr` is a terminal, the output
 will use colors.
 
+Colors on stream outputs can be controlled with environment variables, as
+described on `no-color.org <https://no-color.org/>`_: when `NO_COLOR` is set to
+a non-empty value, colors are never used; otherwise, when `FORCE_COLOR` is set
+to a non-empty value, colors are always used, even if the stream is not a
+terminal (e.g. in Jupyter or in CI logs).
+
 .. literalinclude:: ../../examples/basic.py
 
 You can specify different outputs with different formatters. The
