@@ -17,6 +17,7 @@ import types
 import typing
 import unittest
 import warnings
+from unittest import mock
 
 import daiquiri
 
@@ -35,6 +36,35 @@ class TestDaiquiri(unittest.TestCase):
         daiquiri.setup()
         daiquiri.setup(level=logging.DEBUG)
         daiquiri.setup(program_name="foobar")
+
+    def test_setup_fixes_windows_console(self) -> None:
+        original_stderr = sys.stderr
+        original_stream = daiquiri.output.STDERR.handler.stream
+        wrapped_stderr = io.StringIO()
+
+        def just_fix_windows_console() -> None:
+            sys.stderr = wrapped_stderr
+
+        colorama = types.ModuleType("colorama")
+        colorama.__dict__["just_fix_windows_console"] = just_fix_windows_console
+
+        try:
+            with (
+                mock.patch.object(sys, "platform", "win32"),
+                mock.patch.dict(sys.modules, {"colorama": colorama}),
+            ):
+                daiquiri.setup(outputs=(), capture_warnings=False, set_excepthook=False)
+                self.assertIs(daiquiri.output.STDERR.handler.stream, wrapped_stderr)
+        finally:
+            sys.stderr = original_stderr
+            daiquiri.output.STDERR.handler.setStream(original_stream)
+
+    def test_setup_without_colorama(self) -> None:
+        with (
+            mock.patch.object(sys, "platform", "win32"),
+            mock.patch("builtins.__import__", side_effect=ImportError),
+        ):
+            daiquiri.setup(outputs=(), capture_warnings=False, set_excepthook=False)
 
     def test_excepthook(self) -> None:
         hook_ran = False

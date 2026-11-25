@@ -71,6 +71,25 @@ def getLogger(name: str | None = None, **kwargs: typing.Any) -> KeywordArgumentA
     return KeywordArgumentAdapter(logging.getLogger(name), kwargs)
 
 
+def _fix_windows_console() -> None:
+    if sys.platform != "win32":
+        return
+
+    try:
+        import colorama
+    except ImportError:
+        return
+
+    stdout = sys.stdout
+    stderr = sys.stderr
+    colorama.just_fix_windows_console()
+
+    if sys.stdout is not stdout:
+        output.STDOUT.handler.setStream(sys.stdout)
+    if sys.stderr is not stderr:
+        output.STDERR.handler.setStream(sys.stderr)
+
+
 def setup(
     level: int | str = logging.WARNING,
     outputs: typing.Iterable[output.Output | str] = [output.STDERR],
@@ -87,6 +106,7 @@ def setup(
     :param program_name: The name of the program. Auto-detected if not set.
     :param capture_warnings: Capture warnings from the `warnings` module.
     """
+    _fix_windows_console()
     root_logger = logging.getLogger(None)
 
     # Remove all handlers
