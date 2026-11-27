@@ -97,6 +97,33 @@ configure on it.
 .. literalinclude:: ../../examples/advanced_extra.py
 
 
+Escaping control characters
+---------------------------
+
+The text formatters write the message and the extra values as they are. A
+value that holds a line feed therefore starts a new line in the log, and one
+that holds an escape sequence reaches the terminal. If you log text that comes
+from users or other untrusted sources, pass `escape_control_chars=True` to
+`ColorFormatter`, `ExtrasFormatter` or `ColorExtrasFormatter`::
+
+    daiquiri.setup(outputs=[
+        daiquiri.output.Stream(formatter=daiquiri.formatter.ColorExtrasFormatter(
+            fmt=daiquiri.formatter.DEFAULT_EXTRAS_FORMAT,
+            escape_control_chars=True,
+        )),
+    ])
+
+CR, LF, ESC and the other control characters (except tab) in the message, its
+arguments and the extra names and values are then written as ``\r``, ``\n``
+or ``\x1b``. Tracebacks logged with `exc_info` (for instance by
+`logger.exception`) are not escaped and stay multi-line, and so do the colors
+the formatter adds itself. Messages that are multi-line by design are escaped
+like any other message, and are written on one line: the warnings captured from
+the `warnings` module, and the uncaught exceptions logged by the hook that
+`daiquiri.setup` installs. The option is off by default. The JSON formatters
+already escape these characters.
+
+
 Syslog support
 --------------
 
