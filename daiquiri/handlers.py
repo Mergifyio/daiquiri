@@ -13,6 +13,8 @@
 import logging
 import logging.config
 import logging.handlers
+import socket
+import ssl
 import typing
 
 try:
@@ -136,6 +138,42 @@ class PlainTextSocketHandler(logging.handlers.SocketHandler):
 
     def makePickle(self, record: logging.LogRecord) -> bytes:
         return self.format(record).encode(self.encoding) + b"\n"
+
+
+class TLSPlainTextSocketHandler(PlainTextSocketHandler):
+    """PlainTextSocketHandler that sends the records over TLS.
+
+    The server certificate and host name are verified. By default the
+    system's trusted certificate authorities are used; pass ssl_context, or
+    set it as a class attribute in a subclass, to use your own (for
+    instance ssl.create_default_context(cafile=...)).
+
+    If the TLS handshake fails, nothing is sent: the connection is retried
+    later, as SocketHandler does for any connection error, and never falls
+    back to plain TCP.
+    """
+
+    ssl_context: ssl.SSLContext | None = None
+
+    def __init__(
+        self,
+        hostname: str,
+        port: int,
+        encoding: str = "utf-8",
+        ssl_context: ssl.SSLContext | None = None,
+    ) -> None:
+        self._ssl_context = (
+            ssl_context or self.ssl_context or ssl.create_default_context()
+        )
+        super().__init__(hostname, port, encoding)
+
+    def makeSocket(self, timeout: float = 1) -> socket.socket:
+        sock = super().makeSocket(timeout)
+        try:
+            return self._ssl_context.wrap_socket(sock, server_hostname=self.host)
+        except BaseException:
+            sock.close()
+            raise
 
 
 class PlainTextDatagramHandler(logging.handlers.DatagramHandler):
